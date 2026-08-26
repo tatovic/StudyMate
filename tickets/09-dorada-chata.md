@@ -18,6 +18,8 @@ grupe sa dugom istorijom učitavaju starije poruke na zahtev umesto da se sve do
 - [ ] Korisnik ne može obrisati tuđu poruku; pokušaj je odbijen i na nivou baze
 - [ ] Chat inicijalno učitava ograničen broj poslednjih poruka
 - [ ] Starije poruke se dodatno učitavaju na zahtev, uz očuvanje pozicije skrola
-- [ ] Poslata poruka se prikazuje odmah pošiljaocu i ne duplira se kada stigne uživo
+- [x] Poslata poruka se prikazuje odmah pošiljaocu i ne duplira se kada stigne uživo
+      (rešeno usput u tiketu 01.5, dok se ispravljao e2e test — vidi `chat.tsx` i
+      poznati nedostatak N-1 u `prd.md`; ostatak ovog tiketa nije dirat)
 - [ ] Neuspešno slanje prikazuje grešku i ne gubi otkucani tekst
 - [ ] Prazan ili samo-razmak tekst se ne šalje

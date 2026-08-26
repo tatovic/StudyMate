@@ -56,5 +56,7 @@ desilo tokom provere ovog tiketa.
 Tokom provere otkrivena su dva defekta koja nisu u opsegu ovog tiketa i prebačena su
 u „Poznati nedostaci" u `prd.md`:
 
-1. Poslata poruka se ne prikazuje pošiljaocu dok se strana ne osveži → tiket 09
+1. ~~Poslata poruka se ne prikazuje pošiljaocu dok se strana ne osveži → tiket 09~~
+   Rešeno usput u tiketu 01.5 (e2e test ga je otkrio kao stvarni bag, ne samo kao
+   nedostatak optimističkog UI-ja — videti `prd.md`, N-1).
 2. Broj članova grupe je 0 za sve grupe čiji korisnik nije član → tiket 06

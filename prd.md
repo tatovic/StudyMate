@@ -142,7 +142,7 @@ Otkriveni tokom provere tiketa 01. Nijedan nije blokada, ali se ne smeju izgubit
 
 | # | Nedostatak | Uzrok | Rešava |
 |---|---|---|---|
-| N-1 | Poslata poruka se ne vidi pošiljaocu dok se strana ne osveži | Chat se oslanja isključivo na Realtime događaj i ne dodaje poruku lokalno. Realtime je proveren nezavisno i ispravno isporučuje događaje, pa je greška u komponenti, ne u bazi. | tiket 09 |
+| ~~N-1~~ | ~~Poslata poruka se ne vidi pošiljaocu dok se strana ne osveži~~ | **Rešeno u tiketu 01.5.** Uzrok nije bio samo nedostatak optimističkog dodavanja u komponenti — e2e test je otkrio da je Realtime pretplata sa `filter: group_id=eq.X` padala na `"invalid column for filter"` (kolona nema samostalan indeks), a i bez filtera je autorizacija na soketu (JWT) ponekad kasnila. Vidi `chat.tsx` i `tech.md` → Poznate zamke. | — |
 | N-2 | Broj članova grupe se prikazuje kao `0/10` za svaku grupu čiji korisnik nije član | RLS politika nad `group_members` dozvoljava čitanje samo sopstvenih članstava i članstava svojih grupa, pa agregatni `count` nečlanu vraća nulu. Posledično ni „popunjena grupa" ne radi. | tiket 06 |
 
 N-2 traži odluku pre implementacije: da li je spisak članova javne grupe vidljiv svim
