@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { porukaGreske } from '@/lib/auth-greske'
 
 export async function login(_prev: unknown, formData: FormData) {
   const supabase = await createClient()
@@ -12,7 +13,7 @@ export async function login(_prev: unknown, formData: FormData) {
     password: String(formData.get('password')),
   })
 
-  if (error) return { greska: 'Pogresan email ili lozinka.' }
+  if (error) return { greska: porukaGreske(error, 'Pogresan email ili lozinka.') }
 
   revalidatePath('/', 'layout')
   redirect('/dashboard')
@@ -27,7 +28,9 @@ export async function register(_prev: unknown, formData: FormData) {
     options: { data: { ime: String(formData.get('ime')) } },
   })
 
-  if (error) return { greska: error.message }
+  if (error) {
+    return { greska: porukaGreske(error, 'Registracija nije uspela. Pokusaj ponovo.') }
+  }
 
   revalidatePath('/', 'layout')
   redirect('/dashboard')

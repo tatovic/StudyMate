@@ -90,6 +90,8 @@ studymate/
   supabase/migrations/          SQL migracije (redosled je bitan)
   src/
     proxy.ts                    Next 16 proxy — sesija + zaštita ruta
+    lib/
+      auth-greske.ts            Prevod Supabase auth kodova u poruke na srpskom
     lib/supabase/
       client.ts                 Browser klijent (Client Components)
       server.ts                 Server klijent (RSC, Actions, Route Handlers)

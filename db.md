@@ -193,6 +193,10 @@ Sve politike su `TO authenticated`. Neprijavljen korisnik ne vidi ništa.
 - Učitavanje poruka ima smisla samo ako je korisnik član; u suprotnom RLS vrati prazan niz.
 - `profiles` je vidljiv svim prijavljenima jer je to javni profil. Email **nije** u
   `profiles` i ne izlaže se drugima.
+- **Agregati nad `group_members` su tačni samo članovima.** Politika dozvoljava čitanje
+  sopstvenih članstava i članstava svojih grupa, pa `count(*)` nad tuđom grupom vraća 0,
+  a ne stvarni broj članova. Isto važi za `preporuci_grupe`, koja je `security invoker`.
+  Nedostatak N-2 u `prd.md`; rešava se u tiketu 06.
 
 ---
 

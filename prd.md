@@ -133,10 +133,21 @@ Implementirano i radi:
 - Izbor predmeta sa nivoom znanja
 - Izmena profila (ime, škola, opis)
 - Lista grupa, kreiranje grupe, pridruživanje, napuštanje
-- Strana grupe sa listom članova i Realtime chatom
+- Strana grupe sa listom članova i chatom
 - Baza: 5 migracija, RLS na svim tabelama, 2 RPC funkcije
 
-Poznati nedostaci se rešavaju tiketima u sekciji 8.
+### Poznati nedostaci
+
+Otkriveni tokom provere tiketa 01. Nijedan nije blokada, ali se ne smeju izgubiti:
+
+| # | Nedostatak | Uzrok | Rešava |
+|---|---|---|---|
+| N-1 | Poslata poruka se ne vidi pošiljaocu dok se strana ne osveži | Chat se oslanja isključivo na Realtime događaj i ne dodaje poruku lokalno. Realtime je proveren nezavisno i ispravno isporučuje događaje, pa je greška u komponenti, ne u bazi. | tiket 09 |
+| N-2 | Broj članova grupe se prikazuje kao `0/10` za svaku grupu čiji korisnik nije član | RLS politika nad `group_members` dozvoljava čitanje samo sopstvenih članstava i članstava svojih grupa, pa agregatni `count` nečlanu vraća nulu. Posledično ni „popunjena grupa" ne radi. | tiket 06 |
+
+N-2 traži odluku pre implementacije: da li je spisak članova javne grupe vidljiv svim
+prijavljenim korisnicima. Ako jeste — rešava se novom RLS politikom; ako nije — brojanje
+mora u `security definer` funkciju koja vraća samo broj, bez identiteta članova.
 
 ---
 
@@ -148,7 +159,7 @@ Puni opis i kriterijumi prihvatanja su u `tickets/`.
 **Kada završiš tiket:** štikliraj kvačicu ovde **i** promeni `**Status:**` u
 odgovarajućem fajlu iz `tickets/` u `zavrseno`.
 
-- [ ] **01** — [Popraviti pristup podacima i potvrditi katalog predmeta](./tickets/01-pristup-podacima-i-katalog.md)
+- [x] **01** — [Popraviti pristup podacima i potvrditi katalog predmeta](./tickets/01-pristup-podacima-i-katalog.md)
 - [ ] **01.5** — [Osnovni testovi](./tickets/01.5-osnovni-testovi.md)
 - [ ] **02** — [Generisani tipovi baze umesto ručnih override-a](./tickets/02-generisani-tipovi-baze.md)
 - [ ] **03** — [Slika profila: upload, prikaz i zamena](./tickets/03-slika-profila.md)
