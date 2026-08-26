@@ -18,6 +18,7 @@ Pokreću se redom u Supabase Dashboard → SQL Editor.
 | 003 | `003_matching.sql` | RPC funkcije `pronadji_slicne`, `preporuci_grupe` |
 | 004 | `004_seed.sql` | Početni katalog predmeta |
 | 005 | `005_grants.sql` | Tabelarne privilegije za rolu `authenticated` |
+| 006 | `006_avatars.sql` | Storage bucket `avatars` i politike pristupa |
 
 Konvencija imenovanja za nove: `NNN_kratak_opis.sql`, sledeći slobodan broj.
 
@@ -273,9 +274,38 @@ order by table_name;
 
 ---
 
-## 8. Buduće promene (nisu implementirane)
+## 8. Storage — bucket `avatars`
 
-- Storage bucket `avatars` sa politikama za upload sopstvenog avatara
+Definisan u `006_avatars.sql`.
+
+| Podešavanje | Vrednost |
+|---|---|
+| `public` | `true` — čitanje ide preko javnog URL-a, bez RLS provere |
+| `file_size_limit` | `5242880` (5MB), prati `MAX_VELICINA_SLIKE` u `src/lib/validacija.ts` |
+| `allowed_mime_types` | `image/png`, `image/jpeg`, `image/webp`, `image/gif` |
+
+**Konvencija putanje:** svaki fajl se čuva kao `<user_id>/avatar` — bez ekstenzije,
+uvek isto ime. Otpremanje nove slike koristi `upsert: true` i prepisuje stari fajl na
+istoj putanji, pa se stare slike ne gomilaju u skladištu. `avatar_url` u `profiles` je
+javni URL sa `?v=<timestamp>` dodatkom radi trenutnog osvežavanja prikaza posle zamene.
+
+**Politike nad `storage.objects`** (`to authenticated`, INSERT/UPDATE/DELETE):
+`bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text` — korisnik
+sme da menja isključivo fajlove u sopstvenom folderu (`<svoj_user_id>/...`), što znači da
+može postaviti sliku samo na svoj profil. Posebna SELECT politika nije potrebna jer je
+bucket javan.
+
+**Tok postavljanja:** `avatar-upload.tsx` (Client Component) otprema fajl direktno u
+Storage preko browser klijenta (izuzetak od pravila "sve ide kroz Server Action", isti
+razlog kao kod chata — izbegava se dupli round-trip i limit veličine tela Server
+Action-a), a zatim poziva Server Action `sacuvajAvatar()` koji upisuje javni URL u
+`profiles.avatar_url`. Putanja `<user_id>/avatar` se u akciji gradi iz `getUser()`, nikad
+iz ulaza klijenta.
+
+---
+
+## 9. Buduće promene (nisu implementirane)
+
 - Kolona `messages.izmenjeno_at` za izmenu poruka
 - Tabela `group_invites` za pozivnice u privatne grupe
 - Generisani TypeScript tipovi (`supabase gen types typescript`) — uklanjaju potrebu

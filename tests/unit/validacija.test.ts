@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
+  MAX_VELICINA_SLIKE,
   validirajLozinku,
   validirajMaxClanova,
   validirajNazivGrupe,
+  validirajSlikuProfila,
   validirajTekstPoruke,
 } from '@/lib/validacija'
 
@@ -64,5 +66,22 @@ describe('validirajLozinku', () => {
 
   it('prihvata lozinku od tacno 6 karaktera', () => {
     expect(validirajLozinku('abc123')).toBeNull()
+  })
+})
+
+describe('validirajSlikuProfila', () => {
+  it('odbija nedozvoljen tip fajla', () => {
+    expect(validirajSlikuProfila('application/pdf', 1024)).not.toBeNull()
+  })
+
+  it('odbija fajl preko maksimalne velicine', () => {
+    expect(validirajSlikuProfila('image/png', MAX_VELICINA_SLIKE + 1)).not.toBeNull()
+  })
+
+  it('prihvata dozvoljen tip i velicinu na granici', () => {
+    expect(validirajSlikuProfila('image/png', MAX_VELICINA_SLIKE)).toBeNull()
+    expect(validirajSlikuProfila('image/jpeg', 1024)).toBeNull()
+    expect(validirajSlikuProfila('image/webp', 1024)).toBeNull()
+    expect(validirajSlikuProfila('image/gif', 1024)).toBeNull()
   })
 })

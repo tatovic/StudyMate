@@ -27,3 +27,17 @@ export function validirajLozinku(lozinka: string): string | null {
   if (lozinka.length < 6) return 'Lozinka mora imati bar 6 karaktera.'
   return null
 }
+
+// Prati allowed_mime_types i file_size_limit bucket-a "avatars" iz 006_avatars.sql.
+export const DOZVOLJENI_TIPOVI_SLIKE = ['image/png', 'image/jpeg', 'image/webp', 'image/gif']
+export const MAX_VELICINA_SLIKE = 5 * 1024 * 1024 // 5MB
+
+export function validirajSlikuProfila(tip: string, velicina: number): string | null {
+  if (!DOZVOLJENI_TIPOVI_SLIKE.includes(tip)) {
+    return 'Dozvoljeni formati slike su PNG, JPEG, WEBP i GIF.'
+  }
+  if (velicina > MAX_VELICINA_SLIKE) {
+    return 'Slika je prevelika (najvise 5MB).'
+  }
+  return null
+}

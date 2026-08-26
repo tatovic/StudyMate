@@ -7,17 +7,17 @@ zamenski prikaz (inicijali), nikad prazan okvir.
 
 **Blokiran od:** 02.
 
-**Status:** spremno
+**Status:** zavrseno
 
 ## Kriterijumi prihvatanja
 
-- [ ] Korisnik bira sliku sa uređaja i postavlja je sa strane profila
-- [ ] Postavljena slika se odmah vidi, bez ručnog osvežavanja strane
-- [ ] Postavljanje nove slike zamenjuje staru; stara se ne gomila u skladištu
-- [ ] Dozvoljeni su samo formati slika i razumna maksimalna veličina fajla;
+- [x] Korisnik bira sliku sa uređaja i postavlja je sa strane profila
+- [x] Postavljena slika se odmah vidi, bez ručnog osvežavanja strane
+- [x] Postavljanje nove slike zamenjuje staru; stara se ne gomila u skladištu
+- [x] Dozvoljeni su samo formati slika i razumna maksimalna veličina fajla;
       prekoračenje daje jasnu poruku na srpskom
-- [ ] Korisnik može postaviti sliku isključivo na sopstveni profil
-- [ ] Tuđe slike su vidljive svim prijavljenim korisnicima
-- [ ] Korisnik bez slike se prikazuje zamenskim prikazom sa inicijalima
-- [ ] Avatar se prikazuje u listi sličnih korisnika i u listi članova grupe
-- [ ] Pravila skladišta i njegove politike pristupa dokumentovana u `db.md`
+- [x] Korisnik može postaviti sliku isključivo na sopstveni profil
+- [x] Tuđe slike su vidljive svim prijavljenim korisnicima
+- [x] Korisnik bez slike se prikazuje zamenskim prikazom sa inicijalima
+- [x] Avatar se prikazuje u listi sličnih korisnika i u listi članova grupe
+- [x] Pravila skladišta i njegove politike pristupa dokumentovana u `db.md`

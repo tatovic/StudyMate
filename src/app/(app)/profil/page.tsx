@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { AvatarUpload } from './avatar-upload'
 import { ProfilForm } from './form'
 
 export default async function ProfilPage() {
@@ -9,7 +10,7 @@ export default async function ProfilPage() {
 
   const { data: profil } = await supabase
     .from('profiles')
-    .select('ime, skola, opis')
+    .select('ime, skola, opis, avatar_url')
     .eq('id', user!.id)
     .single()
 
@@ -19,6 +20,12 @@ export default async function ProfilPage() {
         <h1 className="text-2xl font-semibold">Moj profil</h1>
         <p className="text-sm text-gray-600">{user!.email}</p>
       </header>
+
+      <AvatarUpload
+        userId={user!.id}
+        ime={profil?.ime ?? ''}
+        avatarUrl={profil?.avatar_url ?? null}
+      />
 
       <ProfilForm profil={profil ?? { ime: '', skola: null, opis: null }} />
     </main>
