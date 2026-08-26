@@ -15,15 +15,7 @@ export default async function GrupePage() {
     supabase
       .from('groups')
       .select('id, naziv, opis, max_clanova, is_public, subjects(naziv), group_members(count)')
-      .order('created_at', { ascending: false })
-      // subjects je many-to-one relacija pa je objekat, a ne niz kao sto Supabase pretpostavlja
-      // dok nema generisanih tipova baze.
-      .overrideTypes<
-        {
-          subjects: { naziv: string } | null
-          group_members: { count: number }[]
-        }[]
-      >(),
+      .order('created_at', { ascending: false }),
   ])
 
   const mojeGrupe = new Set((mojaClanstva ?? []).map((c) => c.group_id))

@@ -31,6 +31,7 @@ npm run start    # pokretanje produkcijskog build-a
 npm run lint     # eslint
 npx tsc --noEmit # provera tipova bez emitovanja
 npx next typegen # regeneracija tipova ruta (posle brisanja .next)
+npm run gen:types # regeneracija tipova baze iz Supabase seme (vidi sekciju 4.4)
 npm test         # jedinicni testovi + testovi pravila pristupa (Vitest)
 npm run test:e2e # end-to-end test (Playwright) - vidi sekciju 9
 ```
@@ -177,22 +178,27 @@ const [state, formAction, pending] = useActionState(akcija, null)
 // akcija: (_prev: unknown, formData: FormData) => Promise<{ greska?: string; poruka?: string }>
 ```
 
-### 4.4 Tipovi embedovanih relacija
+### 4.4 Generisani tipovi baze
 
-Bez generisanih tipova baze, `supabase-js` pretpostavlja da je svaka embedovana relacija
-**niz**, iako many-to-one veza vraća objekat. Rešava se sa `.overrideTypes<>()`:
+Tipovi se generišu direktno iz Supabase šeme i žive u
+[`src/lib/supabase/database.types.ts`](./src/lib/supabase/database.types.ts) (commit-ovan fajl,
+ne piše se ručno). Sva tri klijenta (`lib/supabase/client.ts`, `server.ts`, `proxy.ts`) su
+parametrizovana sa `Database` tipom — `createBrowserClient<Database>(...)`,
+`createServerClient<Database>(...)`.
 
-```ts
-const { data } = await supabase
-  .from('groups')
-  .select('id, naziv, subjects(naziv)')
-  .overrideTypes<{ subjects: { naziv: string } | null }[]>()
+Regeneracija posle izmene migracije:
+
+```bash
+npx supabase login          # jednom po masini, otvara browser za autentifikaciju
+npm run gen:types           # supabase gen types typescript --project-id ... > database.types.ts
 ```
 
-Za `.single()` override je objekat, ne niz.
+Zahvaljujući generisanim tipovima, `supabase-js` sam zna da li je embedovana relacija objekat
+ili niz na osnovu foreign key-a u šemi (many-to-one → objekat, one-to-many → niz) — `.overrideTypes<>()`
+više nije potreban i ne sme se koristiti.
 
-> Ako se kasnije uvedu generisani tipovi (`supabase gen types typescript`),
-> ovi overrideovi se brišu. Do tada su obavezni — bez njih `tsc` puca.
+Isto važi za RPC pozive: `supabase.rpc('pronadji_slicne', ...)` vraća tip direktno iz
+`Database['public']['Functions']`, bez ručnog kastovanja (`as`) rezultata.
 
 ---
 

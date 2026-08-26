@@ -31,10 +31,10 @@ export default async function DashboardPage() {
   // RPC vec vraca sortirano i ograniceno, ali redosled prikaza je poslovno pravilo
   // (vidi tests/unit/rangiranje.test.ts), pa se eksplicitno primenjuje i ovde.
   const slicni: Slican[] | null = slicniSirovi
-    ? rangirajSlicneKorisnike(slicniSirovi as Slican[], 10)
+    ? rangirajSlicneKorisnike(slicniSirovi, 10)
     : null
   const grupe: Preporuka[] | null = grupeSirove
-    ? rangirajPreporuceneGrupe(grupeSirove as Preporuka[], 10)
+    ? rangirajPreporuceneGrupe(grupeSirove, 10)
     : null
 
   return (

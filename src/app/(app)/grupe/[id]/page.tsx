@@ -24,8 +24,6 @@ export default async function GrupaPage({
     .select('id, naziv, opis, max_clanova, is_public, owner_id, subjects(naziv)')
     .eq('id', groupId)
     .single()
-    // subjects je many-to-one relacija -> objekat, ne niz.
-    .overrideTypes<{ subjects: { naziv: string } | null }>()
 
   // RLS vraca prazno ako grupa ne postoji ili korisnik nema pravo da je vidi.
   if (!grupa) notFound()
@@ -35,7 +33,6 @@ export default async function GrupaPage({
     .select('user_id, uloga, profiles(ime, skola)')
     .eq('group_id', groupId)
     .eq('status', 'aktivan')
-    .overrideTypes<{ profiles: { ime: string; skola: string | null } | null }[]>()
 
   const jeClan = (clanovi ?? []).some((c) => c.user_id === user!.id)
   const jeVlasnik = grupa.owner_id === user!.id

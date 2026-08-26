@@ -7,7 +7,7 @@ bržim i sigurnijim.
 
 **Blokiran od:** 01.5.
 
-**Status:** spremno
+**Status:** zavrseno
 
 ## Zašto sada
 
@@ -19,11 +19,11 @@ mesta. „Napravi promenu lakom, pa onda napravi laku promenu."
 
 ## Kriterijumi prihvatanja
 
-- [ ] Tipovi baze se generišu iz Supabase šeme i čuvaju u repou
-- [ ] Postoji npm skripta za regeneraciju tipova, dokumentovana u `tech.md`
-- [ ] Supabase klijenti (browser, server, proxy) su parametrizovani tipom baze
-- [ ] Svi `.overrideTypes<>()` pozivi su uklonjeni, a upiti i dalje prolaze proveru tipova
-- [ ] Rezultati RPC funkcija su tipizirani; nema ručnog kastovanja rezultata
-- [ ] Nigde u kodu nema `any`
-- [ ] `npx tsc --noEmit`, `npm run lint` i `npm run build` prolaze
-- [ ] `tech.md` sekcija o tipovima embedovanih relacija ažurirana da odražava novo stanje
+- [x] Tipovi baze se generišu iz Supabase šeme i čuvaju u repou
+- [x] Postoji npm skripta za regeneraciju tipova, dokumentovana u `tech.md`
+- [x] Supabase klijenti (browser, server, proxy) su parametrizovani tipom baze
+- [x] Svi `.overrideTypes<>()` pozivi su uklonjeni, a upiti i dalje prolaze proveru tipova
+- [x] Rezultati RPC funkcija su tipizirani; nema ručnog kastovanja rezultata
+- [x] Nigde u kodu nema `any`
+- [x] `npx tsc --noEmit`, `npm run lint` i `npm run build` prolaze
+- [x] `tech.md` sekcija o tipovima embedovanih relacija ažurirana da odražava novo stanje
