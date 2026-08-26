@@ -30,31 +30,41 @@ export function Chat({
 
   useEffect(() => {
     const supabase = createClient()
+    let otkazano = false
+    let kanal: ReturnType<typeof supabase.channel> | null = null
 
-    // Realtime: nove poruke stizu bez refresh-a.
-    const kanal = supabase
-      .channel(`grupa-${groupId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `group_id=eq.${groupId}`,
-        },
-        (payload) => {
-          const nova = payload.new as Omit<Poruka, 'autor'>
-          setPoruke((prev) =>
-            prev.some((p) => p.id === nova.id)
-              ? prev
-              : [...prev, { ...nova, autor: imenaClanova[nova.user_id] ?? 'Nepoznat' }]
-          )
-        }
-      )
-      .subscribe()
+    // Realtime za RLS-zasticenu tabelu proverava autorizaciju preko JWT-a na soketu,
+    // a taj JWT se postavlja tek posle ucitavanja sesije - ako se pretplati odmah po
+    // kreiranju novog klijenta, sesija jos nije stigla i provera pada na
+    // "Error 401: Unauthorized" (poruka nikad ne stigne). Zato se ceka getSession().
+    supabase.auth.getSession().then(() => {
+      if (otkazano) return
+
+      // Namerno BEZ server-side "filter" - Supabase Realtime ga odbija sa
+      // "invalid column for filter group_id" jer group_id nema samostalan indeks
+      // (vidi tech.md, Poznate zamke). RLS vec ogranicava koje redove korisnik uopste
+      // prima, pa se filtriranje po konkretnoj grupi radi ovde.
+      kanal = supabase
+        .channel(`grupa-${groupId}`)
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'messages' },
+          (payload) => {
+            const nova = payload.new as Omit<Poruka, 'autor'> & { group_id: number }
+            if (nova.group_id !== groupId) return
+            setPoruke((prev) =>
+              prev.some((p) => p.id === nova.id)
+                ? prev
+                : [...prev, { ...nova, autor: imenaClanova[nova.user_id] ?? 'Nepoznat' }]
+            )
+          }
+        )
+        .subscribe()
+    })
 
     return () => {
-      supabase.removeChannel(kanal)
+      otkazano = true
+      if (kanal) supabase.removeChannel(kanal)
     }
   }, [groupId, imenaClanova])
 
@@ -69,11 +79,23 @@ export function Chat({
 
     setSalje(true)
     const supabase = createClient()
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('messages')
       .insert({ group_id: groupId, user_id: userId, tekst: sadrzaj })
+      .select('id, tekst, user_id, created_at')
+      .single()
 
-    if (!error) setTekst('')
+    // Sopstvena poruka se prikazuje odmah, ne ceka se Realtime povratna informacija -
+    // pretplata (iznad) moze da se uspostavi i posle ovog trenutka, pa bi cekanje na nju
+    // ovde ostavilo posiljaoca da gleda praznu poruku dok se ne osvezi stranica.
+    if (!error && data) {
+      setTekst('')
+      setPoruke((prev) =>
+        prev.some((p) => p.id === data.id)
+          ? prev
+          : [...prev, { ...data, autor: imenaClanova[userId] ?? 'Nepoznat' }]
+      )
+    }
     setSalje(false)
   }
 
