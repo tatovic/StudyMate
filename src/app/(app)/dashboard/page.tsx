@@ -1,21 +1,14 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import {
+  rangirajSlicneKorisnike,
+  rangirajPreporuceneGrupe,
+  type SlicanKorisnik,
+  type PreporucenaGrupa,
+} from '@/lib/rangiranje'
 
-type Slican = {
-  id: string
-  ime: string
-  skola: string | null
-  zajednicki: number
-  predmeti: string[]
-}
-
-type Preporuka = {
-  id: number
-  naziv: string
-  predmet: string
-  broj_clanova: number
-  max_clanova: number
-}
+type Slican = SlicanKorisnik
+type Preporuka = PreporucenaGrupa
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -30,10 +23,19 @@ export default async function DashboardPage() {
     .eq('id', user!.id)
     .single()
 
-  const [{ data: slicni }, { data: grupe }] = await Promise.all([
+  const [{ data: slicniSirovi }, { data: grupeSirove }] = await Promise.all([
     supabase.rpc('pronadji_slicne', { limit_n: 10 }),
     supabase.rpc('preporuci_grupe', { limit_n: 10 }),
   ])
+
+  // RPC vec vraca sortirano i ograniceno, ali redosled prikaza je poslovno pravilo
+  // (vidi tests/unit/rangiranje.test.ts), pa se eksplicitno primenjuje i ovde.
+  const slicni: Slican[] | null = slicniSirovi
+    ? rangirajSlicneKorisnike(slicniSirovi as Slican[], 10)
+    : null
+  const grupe: Preporuka[] | null = grupeSirove
+    ? rangirajPreporuceneGrupe(grupeSirove as Preporuka[], 10)
+    : null
 
   return (
     <main className="mx-auto max-w-3xl space-y-8 p-6">
@@ -54,7 +56,7 @@ export default async function DashboardPage() {
           </p>
         ) : (
           <ul className="divide-y rounded-md border">
-            {(slicni as Slican[]).map((k) => (
+            {slicni!.map((k) => (
               <li key={k.id} className="flex items-center justify-between gap-4 p-3">
                 <div className="min-w-0">
                   <p className="font-medium">{k.ime}</p>
@@ -81,7 +83,7 @@ export default async function DashboardPage() {
           <p className="text-sm text-gray-600">Trenutno nema otvorenih grupa za tvoje predmete.</p>
         ) : (
           <ul className="divide-y rounded-md border">
-            {(grupe as Preporuka[]).map((g) => (
+            {grupe!.map((g) => (
               <li key={g.id} className="flex items-center justify-between gap-4 p-3">
                 <div className="min-w-0">
                   <Link href={`/grupe/${g.id}`} className="font-medium hover:underline">

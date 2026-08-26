@@ -31,6 +31,8 @@ npm run start    # pokretanje produkcijskog build-a
 npm run lint     # eslint
 npx tsc --noEmit # provera tipova bez emitovanja
 npx next typegen # regeneracija tipova ruta (posle brisanja .next)
+npm test         # jedinicni testovi + testovi pravila pristupa (Vitest)
+npm run test:e2e # end-to-end test (Playwright) - vidi sekciju 9
 ```
 
 ---
@@ -92,6 +94,8 @@ studymate/
     proxy.ts                    Next 16 proxy — sesija + zaštita ruta
     lib/
       auth-greske.ts            Prevod Supabase auth kodova u poruke na srpskom
+      validacija.ts             Cista validacija unosa (testirano u tests/unit/)
+      rangiranje.ts             Cista logika rangiranja preporuka (testirano u tests/unit/)
     lib/supabase/
       client.ts                 Browser klijent (Client Components)
       server.ts                 Server klijent (RSC, Actions, Route Handlers)
@@ -109,6 +113,11 @@ studymate/
         grupe/
           page.tsx, actions.ts, nova-grupa.tsx
           [id]/page.tsx, chat.tsx
+  tests/
+    unit/                        Cista logika (validacija.ts, rangiranje.ts)
+    rls/                         Testovi RLS politika nad pravom bazom
+    e2e/                         Playwright test glavnog toka
+    helpers/                     Zajednicki test kod (env, admin klijent, registracija)
   .env.local                    NIJE u gitu
 ```
 
@@ -221,14 +230,78 @@ Tiket nije završen dok sve ovo ne prolazi:
 - [ ] `npx tsc --noEmit` — bez grešaka
 - [ ] `npm run lint` — bez grešaka
 - [ ] `npm run build` — prolazi
+- [ ] `npm test` — prolazi (jedinični testovi + testovi pravila pristupa)
+- [ ] Ako je tiket dirao glavni tok (prijava, predmeti, grupe, chat): `npm run test:e2e` prolazi
 - [ ] Funkcionalnost ručno proverena u `npm run dev`
 - [ ] Ako je dirana baza: nova migracija u `supabase/migrations/` i ažuriran `db.md`
+- [ ] Ako je dirana logika validacije ili rangiranja: dodati/ažurirati testovi u `tests/unit/`
 - [ ] Kvačica u `prd.md` uz odgovarajući tiket
 - [ ] Commit sa jasnom porukom na srpskom
 
 ---
 
-## 8. Poznate zamke
+## 8. Testiranje
+
+Tri nivoa, svaki u svom direktorijumu i sa svojom svrhom (vidi
+[01.5-osnovni-testovi.md](./tickets/01.5-osnovni-testovi.md)):
+
+| Nivo | Direktorijum | Alat | Pokreće se sa |
+|---|---|---|---|
+| Jedinični | `tests/unit/` | Vitest | `npm test` |
+| Pravila pristupa (RLS) | `tests/rls/` | Vitest + `@supabase/supabase-js` | `npm test` |
+| End-to-end | `tests/e2e/` | Playwright | `npm run test:e2e` |
+
+### 8.1 Jedinični testovi
+
+Čista logika bez baze i bez mreže. Živi u `src/lib/`:
+
+- `src/lib/validacija.ts` — pravila koja prate postojeća ograničenja u bazi
+  (`max_clanova` 2–100, `tekst` poruke 1–2000 karaktera, lozinka min. 6 karaktera, naziv grupe
+  obavezan). Ne izmišljati nova pravila ovde — samo ona koja već postoje kao CHECK u
+  `001_schema.sql` ili kao HTML atribut na formi.
+- `src/lib/rangiranje.ts` — isti redosled kao RPC funkcije `pronadji_slicne` i
+  `preporuci_grupe` iz `003_matching.sql`. Ako se promeni `ORDER BY` u SQL-u, promeni i
+  ovde (i obrnuto) — test će uhvatiti neslaganje.
+
+### 8.2 Testovi pravila pristupa
+
+Rade nad **pravom** Supabase bazom iz `.env.local` — RLS je funkcija baze i ne može se
+verodostojno testirati bez nje. Svaki test pravi sopstvene test korisnike preko
+`supabase.auth.signUp` (isto što radi i registraciona forma), pa proverava šta jedan
+korisnik sme da vidi/menja kod drugog.
+
+**Dodatni env. promenljiva, samo za testove** (nikad se ne koristi u `src/`):
+
+```
+SUPABASE_SERVICE_ROLE_KEY=...   # Project Settings -> API -> service_role
+```
+
+Koristi se isključivo u `tests/helpers/admin.ts` da obriše test korisnike posle testa.
+Zahvaljujući `on delete cascade` lancu u šemi, brisanje `auth.users` reda automatski
+povlači i profil, predmete, grupe, članstva i poruke tog korisnika — nema ručnog čišćenja
+tabela, testovi ne ostavljaju smeće.
+
+**Preduslov:** *Confirm email* mora biti isključen u tom Supabase projektu (isto
+podešavanje koje `db.md` već traži za razvoj) — inače `signUp` ne vraća odmah aktivnu
+sesiju i test korisnik ne može ništa da uradi.
+
+### 8.3 End-to-end test
+
+`tests/e2e/glavni-tok.spec.ts` pokriva ceo tok: registracija → izbor predmeta →
+kreiranje grupe → slanje poruke → odjava. Playwright sam pokreće `npm run dev` i čeka
+`http://localhost:3000` (vidi `playwright.config.ts`), pa ne treba ručno paliti server.
+Test pravi jednog test korisnika sa jedinstvenim emailom i briše ga na kraju preko istog
+`tests/helpers/admin.ts`.
+
+Pre prvog pokretanja treba instalirati Chromium za Playwright:
+
+```bash
+npx playwright install chromium
+```
+
+---
+
+## 9. Poznate zamke
 
 | Simptom | Uzrok | Rešenje |
 |---|---|---|

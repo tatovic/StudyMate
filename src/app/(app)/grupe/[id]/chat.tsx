@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { validirajTekstPoruke } from '@/lib/validacija'
 
 export type Poruka = {
   id: number
@@ -64,7 +65,7 @@ export function Chat({
   async function posalji(e: React.FormEvent) {
     e.preventDefault()
     const sadrzaj = tekst.trim()
-    if (!sadrzaj) return
+    if (validirajTekstPoruke(sadrzaj)) return
 
     setSalje(true)
     const supabase = createClient()

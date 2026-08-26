@@ -73,5 +73,16 @@ Aplikacija radi na `http://localhost:3000`.
 ## Provere pre commita
 
 ```bash
-npx tsc --noEmit && npm run lint && npm run build
+npx tsc --noEmit && npm run lint && npm run build && npm test
 ```
+
+## Testiranje
+
+```bash
+npm test          # jedinicni testovi + testovi pravila pristupa (Vitest)
+npm run test:e2e  # end-to-end test glavnog toka (Playwright)
+```
+
+Testovi pravila pristupa i e2e test rade nad pravom Supabase bazom iz `.env.local` i
+zahtevaju dodatnu promenljivu `SUPABASE_SERVICE_ROLE_KEY` (samo za ciscenje test
+korisnika posle testa — vidi `.env.local.example` i `tech.md`, sekcija 8).

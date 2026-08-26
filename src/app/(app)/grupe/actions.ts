@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { validirajNazivGrupe, validirajMaxClanova } from '@/lib/validacija'
 
 export async function napraviGrupu(_prev: unknown, formData: FormData) {
   const supabase = await createClient()
@@ -12,7 +13,12 @@ export async function napraviGrupu(_prev: unknown, formData: FormData) {
   if (!user) return { greska: 'Niste prijavljeni.' }
 
   const naziv = String(formData.get('naziv') ?? '').trim()
-  if (!naziv) return { greska: 'Naziv grupe je obavezan.' }
+  const nazivGreska = validirajNazivGrupe(naziv)
+  if (nazivGreska) return { greska: nazivGreska }
+
+  const maxClanova = Number(formData.get('max_clanova') ?? 10)
+  const maxClanovaGreska = validirajMaxClanova(maxClanova)
+  if (maxClanovaGreska) return { greska: maxClanovaGreska }
 
   const { data: grupa, error } = await supabase
     .from('groups')
@@ -21,7 +27,7 @@ export async function napraviGrupu(_prev: unknown, formData: FormData) {
       opis: String(formData.get('opis') ?? '').trim() || null,
       subject_id: Number(formData.get('subject_id')),
       owner_id: user.id,
-      max_clanova: Number(formData.get('max_clanova') ?? 10),
+      max_clanova: maxClanova,
       is_public: formData.get('is_public') === 'on',
     })
     .select('id')

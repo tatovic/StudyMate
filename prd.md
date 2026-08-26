@@ -160,7 +160,7 @@ Puni opis i kriterijumi prihvatanja su u `tickets/`.
 odgovarajućem fajlu iz `tickets/` u `zavrseno`.
 
 - [x] **01** — [Popraviti pristup podacima i potvrditi katalog predmeta](./tickets/01-pristup-podacima-i-katalog.md)
-- [ ] **01.5** — [Osnovni testovi](./tickets/01.5-osnovni-testovi.md)
+- [x] **01.5** — [Osnovni testovi](./tickets/01.5-osnovni-testovi.md)
 - [ ] **02** — [Generisani tipovi baze umesto ručnih override-a](./tickets/02-generisani-tipovi-baze.md)
 - [ ] **03** — [Slika profila: upload, prikaz i zamena](./tickets/03-slika-profila.md)
 - [ ] **04** — [Javni profil drugog korisnika](./tickets/04-javni-profil-korisnika.md)
