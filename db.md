@@ -24,6 +24,7 @@ Pokreću se redom u Supabase Dashboard → SQL Editor.
 | 009 | `009_pretraga_korisnika.sql` | RPC funkcija `pretrazi_korisnike` (za pretragu i filtriranje korisnika, tiket 05) |
 | 010 | `010_upravljanje_grupom.sql` | Dodatna RLS politika: vlasnik grupe sme da ukloni clanstvo bilo kog drugog clana (za upravljanje grupom, tiket 07) |
 | 011 | `011_privatne_grupe.sql` | Privatne grupe vidljive svima u pretrazi; INSERT politika nad `group_members` **zamenjena** da spreci zaobilazenje odobravanja; nova UPDATE politika za odobravanje zahteva (tiket 08) |
+| 012 | `012_realtime_brisanje_poruka.sql` | `messages` prebacena na `REPLICA IDENTITY FULL` da bi Realtime DELETE dogadjaji nosili dovoljno kolona za RLS proveru (tiket 09) |
 
 Konvencija imenovanja za nove: `NNN_kratak_opis.sql`, sledeći slobodan broj.
 
@@ -142,6 +143,13 @@ Primarni ključ: `(group_id, user_id)`.
 Indeks `(group_id, created_at desc)` za učitavanje poslednjih poruka.
 
 Tabela je dodata u `supabase_realtime` publikaciju, pa `postgres_changes` pretplata radi.
+
+**`REPLICA IDENTITY FULL`** (od migracije 012, tiket 09): podrazumevano Postgres šalje u
+`old` delu DELETE/UPDATE payload-a samo kolone primarnog ključa (`id`). RLS politika za
+SELECT proverava `group_id` (preko `je_clan`), pa bez `group_id` u `old` zapisu Realtime
+ne može da proceni ko sme da vidi DELETE događaj i ne isporučuje ga nikome. `FULL`
+identitet nosi sve kolone starog reda, čime brisanje poruke stiže uživo ostalim
+članovima grupe (vidi `chat.tsx`).
 
 ---
 

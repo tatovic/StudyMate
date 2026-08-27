@@ -30,13 +30,20 @@ test('registracija, izbor predmeta, kreiranje grupe, poruka, odjava', async ({ p
     await page.goto('/grupe')
     await page.getByRole('button', { name: 'Napravi grupu' }).click()
     await page.getByPlaceholder('Naziv grupe').fill(nazivGrupe)
-    await page.getByRole('combobox').selectOption({ label: 'Matematika' })
+    // Selektor po "name" atributu, ne generican "combobox" - stranica grupa od tiketa 06
+    // ima i combobox za filtriranje (name="predmet"), pa bi generican upit pogodio oba i
+    // pukao (strict mode). Select za kreiranje grupe je name="subject_id" (nova-grupa.tsx).
+    await page.locator('select[name="subject_id"]').selectOption({ label: 'Matematika' })
     await page.getByRole('button', { name: 'Kreiraj' }).click()
     await expect(page).toHaveURL(/\/grupe\/\d+/)
 
     await page.getByPlaceholder('Napisi poruku...').fill(tekstPoruke)
     await page.getByRole('button', { name: 'Posalji' }).click()
     await expect(page.getByText(tekstPoruke)).toBeVisible()
+
+    await page.getByRole('button', { name: 'Obrisi', exact: true }).click()
+    await page.getByRole('button', { name: 'Da', exact: true }).click()
+    await expect(page.getByText(tekstPoruke)).not.toBeVisible()
 
     await page.getByRole('button', { name: 'Odjavi se' }).click()
     await expect(page).toHaveURL(/\/login/)

@@ -12,6 +12,7 @@ import {
 } from '../actions'
 import { Chat, type Poruka } from './chat'
 import { IzmeniGrupu } from './izmeni-grupu'
+import { PORUKA_STRANICA } from './poruka-stranica'
 import { PotvrdaDugme } from './potvrda-dugme'
 
 // Next.js 16: params i searchParams su Promise i moraju se await-ovati.
@@ -93,17 +94,26 @@ export default async function GrupaPage({
     (clanovi ?? []).map((c) => [c.user_id, c.profiles?.ime ?? 'Nepoznat'])
   )
 
-  // Poruke su citljive samo clanovima (RLS), zato se ucitavaju uslovno.
+  // Poruke su citljive samo clanovima (RLS), zato se ucitavaju uslovno. Ucitava se
+  // PORUKA_STRANICA + 1 najnovijih (opadajuce po vremenu) da bi se iz jednog upita znalo
+  // da li ima jos starijih - ako je vracen jedan visak, on se odbacuje pre prikaza, a
+  // "Ucitaj starije poruke" u chat.tsx dovlaci ostatak na zahtev.
   let poruke: Poruka[] = []
+  let imaStarijihPoruka = false
   if (jeClan) {
     const { data } = await supabase
       .from('messages')
       .select('id, tekst, user_id, created_at')
       .eq('group_id', groupId)
-      .order('created_at', { ascending: true })
-      .limit(100)
+      .order('created_at', { ascending: false })
+      .limit(PORUKA_STRANICA + 1)
 
-    poruke = (data ?? []).map((p) => ({ ...p, autor: imena[p.user_id] ?? 'Nepoznat' }))
+    const sirove = data ?? []
+    imaStarijihPoruka = sirove.length > PORUKA_STRANICA
+    poruke = sirove
+      .slice(0, PORUKA_STRANICA)
+      .reverse()
+      .map((p) => ({ ...p, autor: imena[p.user_id] ?? 'Nepoznat' }))
   }
 
   return (
@@ -285,6 +295,7 @@ export default async function GrupaPage({
             groupId={grupa.id}
             userId={user!.id}
             pocetne={poruke}
+            imaStarijih={imaStarijihPoruka}
             imenaClanova={imena}
           />
         ) : zahtevNaCekanju ? (

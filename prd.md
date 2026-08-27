@@ -170,7 +170,7 @@ odgovarajućem fajlu iz `tickets/` u `zavrseno`.
 - [ ] **06** — [Pretraga i filtriranje grupa](./tickets/06-pretraga-grupa.md)
 - [x] **07** — [Upravljanje grupom za vlasnika](./tickets/07-upravljanje-grupom.md)
 - [ ] **08** — [Privatne grupe sa odobravanjem članstva](./tickets/08-privatne-grupe.md)
-- [ ] **09** — [Dorada chata: vreme, brisanje, starije poruke](./tickets/09-dorada-chata.md)
+- [x] **09** — [Dorada chata: vreme, brisanje, starije poruke](./tickets/09-dorada-chata.md)
 - [ ] **10** — [Prazna stanja, učitavanje i obrada grešaka](./tickets/10-prazna-stanja-i-greske.md)
 - [ ] **11** — [Deploy na Vercel i produkcijska autentifikacija](./tickets/11-deploy-i-produkcija.md)
 

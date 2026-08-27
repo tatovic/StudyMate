@@ -168,8 +168,10 @@ export async function nesto(formData: FormData) {
 }
 ```
 
-Izuzetak: slanje chat poruka ide direktno iz Client Componenta preko browser klijenta,
-jer Realtime pretplata ionako radi u browseru i tako se izbegava dupli round-trip.
+Izuzetak: slanje i brisanje chat poruka idu direktno iz Client Componenta preko browser
+klijenta, jer Realtime pretplata ionako radi u browseru i tako se izbegava dupli
+round-trip; RLS politike ("pises poruke u svojim grupama", "brises svoje poruke") su i
+dalje jedina prava zastita, ne komponenta.
 
 Za forme sa povratnom porukom koristi `useActionState`:
 
@@ -319,3 +321,4 @@ npx playwright install chromium
 | `Cannot find name 'LayoutProps'` | Obrisan `.next` | `npx next typegen` |
 | `params.id` je `undefined` | Next 16 — `params` je Promise | `const { id } = await params` |
 | Realtime `postgres_changes` javlja `"invalid column for filter <kolona>"` | Kolona iz `filter:` nema **samostalan** indeks (biti deo složenog indeksa, npr. `(group_id, created_at)`, ne računa se) | Ili dodati samostalan indeks na tu kolonu, ili (kao u `chat.tsx`) izbaciti `filter` i filtrirati u callback-u — RLS već ograničava koje redove korisnik prima |
+| Realtime DELETE/UPDATE događaj ne stiže nikome | `old` deo payload-a nosi samo kolone `REPLICA IDENTITY` (podrazumevano samo primarni ključ), pa Realtime ne može da izračuna RLS politiku koja zavisi od drugih kolona (npr. `group_id`) i tiho ne isporučuje događaj | `alter table ... replica identity full;` (vidi `012_realtime_brisanje_poruka.sql`) |

@@ -85,6 +85,43 @@ describe('Pravila pristupa (RLS)', () => {
     expect(data).toEqual([])
   })
 
+  it('korisnik brise sopstvenu poruku (tiket 09)', async () => {
+    const { data: nova } = await clan1.supabase
+      .from('messages')
+      .insert({ group_id: groupId, user_id: clan1.userId, tekst: '[TEST RLS] poruka za brisanje' })
+      .select('id')
+      .single()
+
+    const { data, error } = await clan1.supabase.from('messages').delete().eq('id', nova!.id).select('id')
+    expect(error).toBeNull()
+    expect(data).toEqual([{ id: nova!.id }])
+
+    const { data: proverena } = await vlasnik.supabase
+      .from('messages')
+      .select('id')
+      .eq('id', nova!.id)
+      .maybeSingle()
+    expect(proverena).toBeNull()
+  })
+
+  it('korisnik ne moze obrisati tudju poruku (tiket 09)', async () => {
+    const { data: tudja } = await clan1.supabase
+      .from('messages')
+      .insert({ group_id: groupId, user_id: clan1.userId, tekst: '[TEST RLS] tudja poruka' })
+      .select('id')
+      .single()
+
+    const { data } = await clan2.supabase.from('messages').delete().eq('id', tudja!.id).select()
+    expect(data).toEqual([])
+
+    const { data: proverena } = await vlasnik.supabase
+      .from('messages')
+      .select('id')
+      .eq('id', tudja!.id)
+      .maybeSingle()
+    expect(proverena?.id).toBe(tudja!.id)
+  })
+
   it('korisnik ne moze izmeniti tudji profil', async () => {
     const { data: rezultatIzmene } = await gost.supabase
       .from('profiles')
