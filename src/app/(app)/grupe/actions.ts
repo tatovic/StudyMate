@@ -37,12 +37,13 @@ export async function napraviGrupu(_prev: unknown, formData: FormData) {
   if (error) return { greska: porukaGreskeBaze(error) }
 
   // Vlasnik je automatski i clan
-  await supabase.from('group_members').insert({
+  const { error: clanstvoGreska } = await supabase.from('group_members').insert({
     group_id: grupa.id,
     user_id: user.id,
     uloga: 'vlasnik',
     status: 'aktivan',
   })
+  if (clanstvoGreska) return { greska: porukaGreskeBaze(clanstvoGreska) }
 
   revalidatePath('/grupe')
   redirect(`/grupe/${grupa.id}`)

@@ -279,11 +279,11 @@ describe('Pravila pristupa (RLS)', () => {
   })
 
   it('korisnik ne moze zaobici odobravanje i direktno postati aktivan clan privatne grupe', async () => {
-    const { data } = await clan2.supabase
+    const { error } = await clan2.supabase
       .from('group_members')
       .insert({ group_id: privatnaGroupId, user_id: clan2.userId, uloga: 'clan', status: 'aktivan' })
       .select()
-    expect(data).toEqual([])
+    expect(error).not.toBeNull()
   })
 
   it('obican clan ne moze odobriti tudji zahtev za clanstvo', async () => {

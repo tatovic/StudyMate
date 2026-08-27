@@ -26,6 +26,7 @@ Pokreću se redom u Supabase Dashboard → SQL Editor.
 | 011 | `011_privatne_grupe.sql` | Privatne grupe vidljive svima u pretrazi; INSERT politika nad `group_members` **zamenjena** da spreci zaobilazenje odobravanja; nova UPDATE politika za odobravanje zahteva (tiket 08) |
 | 012 | `012_realtime_brisanje_poruka.sql` | `messages` prebacena na `REPLICA IDENTITY FULL` da bi Realtime DELETE dogadjaji nosili dovoljno kolona za RLS proveru (tiket 09) |
 | 014 | `014_avatars_owner.sql` | **Popravka tiketa 03:** politike nad `storage.objects` prebačene sa `auth.uid()` na `owner_id` (u Storage kontekstu `auth.uid()` je `NULL`) + SELECT politika zbog `upsert` |
+| 015 | `015_privatna_grupa_vlasnik.sql` | **Popravka tiketa 08:** INSERT politika nad `group_members` iz 011 **zamenjena** da dozvoli vlasniku da sebe upiše kao aktivnog člana i u privatnoj grupi — bez ovoga `napraviGrupu` nije mogao da upiše vlasnika u sopstvenu privatnu grupu (vidi napomenu ispod) |
 
 Konvencija imenovanja za nove: `NNN_kratak_opis.sql`, sledeći slobodan broj.
 
@@ -231,20 +232,33 @@ Sve politike su `TO authenticated`. Neprijavljen korisnik ne vidi ništa.
   `group_members` iz 002_rls.sql ("pridruzujes se sam") je u 011 **zamenjena**, ne
   dopunjena — dodatna permisivna politika bi se samo OR-ovala sa postojećom i ne bi
   ograničila ništa, pa je jedini način da se stvarno zabrani insert bio brisanje i
-  ponovno pravljenje. Nova verzija dozvoljava insert sopstvenog reda sa
-  `status = 'na_cekanju'` za bilo koju grupu, ili sa `status = 'aktivan'` samo ako je
-  ciljna grupa javna — sprečava zaobilaženje odobravanja direktnim insert-om mimo
-  Server Action-a. Odobravanje (`na_cekanju` → `aktivan`) je nova UPDATE politika,
-  ograničena na vlasnika grupe i na redove koji su trenutno `na_cekanju`. Odbijanje
-  zahteva ne treba novu politiku jer postojeća DELETE politika iz 010 već dozvoljava
-  vlasniku da obriše bilo koje članstvo svoje grupe, bez obzira na status. Provera da
-  odobravanje ne bi premašilo `max_clanova` je u Server Action-u (`odobriZahtev`), isti
-  razlog kao kod `izmeniGrupu` u tiketu 07 — zavisi od trenutnog broja aktivnih članova u
-  trenutku izvršavanja, ne može biti CHECK ograničenje. Zahtevi na čekanju se ne broje u
+  ponovno pravljenje. Trenutna verzija (posle popravke u 015, vidi napomenu ispod)
+  dozvoljava insert sopstvenog reda sa `status = 'na_cekanju'` za bilo koju grupu, ili
+  sa `status = 'aktivan'` ako je ciljna grupa javna **ili** ako si vlasnik te grupe —
+  sprečava zaobilaženje odobravanja direktnim insert-om mimo Server Action-a, dok i
+  dalje dozvoljava vlasniku da se odmah upiše kao aktivan član sopstvene (i privatne)
+  grupe. Odobravanje (`na_cekanju` → `aktivan`) je nova UPDATE politika, ograničena na
+  vlasnika grupe i na redove koji su trenutno `na_cekanju`. Odbijanje zahteva ne treba
+  novu politiku jer postojeća DELETE politika iz 010 već dozvoljava vlasniku da obriše
+  bilo koje članstvo svoje grupe, bez obzira na status. Provera da odobravanje ne bi
+  premašilo `max_clanova` je u Server Action-u (`odobriZahtev`), isti razlog kao kod
+  `izmeniGrupu` u tiketu 07 — zavisi od trenutnog broja aktivnih članova u trenutku
+  izvršavanja, ne može biti CHECK ograničenje. Zahtevi na čekanju se ne broje u
   popunjenost jer se svuda eksplicitno filtrira `status = 'aktivan'`. Vlasnik vidi tuđe
   zahteve na čekanju bez ikakve nove SELECT politike — postojeća "vidis clanstva svojih
   grupa" već dozvoljava čitanje svih redova grupe čiji si aktivan član (`je_clan`), a
   vlasnik je uvek aktivan član sopstvene grupe.
+- **Bag otkriven posle tiketa 08, popravljen u 015: vlasnik privatne grupe ostajao bez
+  sopstvenog članstva.** Prvobitna INSERT politika iz 011 je dozvoljavala
+  `status = 'aktivan'` samo za javnu grupu — ali `napraviGrupu` (Server Action) odmah
+  posle pravljenja grupe upisuje vlasnika kao aktivnog člana, pa je taj upis za
+  privatnu grupu bio odbijen. Greška nije bila proverena (`await ... insert(...)` bez
+  `if (error)`), pa je akcija tiho nastavljala na `redirect` i ostavljala vlasnika bez
+  reda u `group_members` — `je_clan()` je za njega vraćao `false` u sopstvenoj grupi, pa
+  nije video članove, zahteve na čekanju ni chat. Migracija 015 dodaje
+  `g.owner_id = auth.uid()` kao dodatni uslov (uz `auth.uid() = user_id`, pa važi samo
+  za vlasnika nad sopstvenom grupom), a `napraviGrupu` sada proverava grešku tog upisa
+  umesto da je ignoriše.
 
 ---
 
