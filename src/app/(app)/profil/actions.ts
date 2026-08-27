@@ -31,22 +31,15 @@ export async function sacuvajProfil(_prev: unknown, formData: FormData) {
   return { poruka: 'Profil je sacuvan.' }
 }
 
-// POZNAT PROBLEM (vidi db.md, sekcija 8): otpremanje trenutno ne radi.
-// Storage servis ovog Supabase projekta odbija INSERT/UPDATE nad
-// storage.objects sa "new row violates row-level security policy" iako je
-// JWT ispravan (auth.uid() se poklapa, uloga je "authenticated") i istovetan
-// upis direktno kroz SQL Editor (uz "set local role authenticated" i iste
-// claim-ove) prolazi bez problema. Isprobano bez uspeha: upload direktno iz
-// browsera, upload kroz Server Action (ovaj kod), politike sa "to public"
-// umesto "to authenticated". Sledeci korak je poredjenje "to public" bez
-// provere vlasnika (da se potvrdi da je bas auth.uid() provera ta koja pada)
-// i, ako ni to ne pomogne, Supabase support/Storage logovi.
-//
 // Otpremanje ide kroz Server Action (ne direktno iz browsera u Storage) jer
-// je to blize konvenciji projekta (Server Actions za sve mutacije) i koristi
-// isti, vec proveren nacin autentifikacije kao ostatak aplikacije. Putanja se
-// gradi iz getUser(), nikad iz ulaza, pa korisnik moze postaviti sliku
-// iskljucivo na sopstveni profil (kad RLS problem bude resen).
+// je to blize konvenciji projekta - sve mutacije idu kroz Server Actions.
+// Zbog velicine slika je podignut bodySizeLimit u next.config.ts.
+//
+// Putanja se gradi iz getUser(), nikad iz ulaza, pa korisnik moze postaviti
+// sliku iskljucivo na sopstveni profil. RLS je druga linija odbrane, ali
+// paznja: politike nad storage.objects se NE oslanjaju na auth.uid(), jer
+// on unutar Storage zahteva vraca NULL (vidi db.md, sekcija 8). Vlasnistvo
+// se proverava preko owner_id kolone koju popunjava sam Storage servis.
 export async function sacuvajAvatar(
   _prev: unknown,
   formData: FormData

@@ -19,14 +19,18 @@ Pokreću se redom u Supabase Dashboard → SQL Editor.
 | 004 | `004_seed.sql` | Početni katalog predmeta |
 | 005 | `005_grants.sql` | Tabelarne privilegije za rolu `authenticated` |
 | 006 | `006_avatars.sql` | Storage bucket `avatars` i politike pristupa |
-| 007 | `007_avatars_rls_fix.sql` | Politike iz 006 promenjene na `to public` (pokusaj popravke, vidi sekciju 8 — jos ne radi) |
+| 007 | `007_avatars_rls_fix.sql` | Politike iz 006 promenjene na `to public` (međukorak istrage, vidi sekciju 8) |
 | 008 | `008_javni_profil.sql` | Dodatna RLS politika: clanstva u javnim grupama vidljiva svim prijavljenima (za javni profil, tiket 04) |
 | 009 | `009_pretraga_korisnika.sql` | RPC funkcija `pretrazi_korisnike` (za pretragu i filtriranje korisnika, tiket 05) |
 | 010 | `010_upravljanje_grupom.sql` | Dodatna RLS politika: vlasnik grupe sme da ukloni clanstvo bilo kog drugog clana (za upravljanje grupom, tiket 07) |
 | 011 | `011_privatne_grupe.sql` | Privatne grupe vidljive svima u pretrazi; INSERT politika nad `group_members` **zamenjena** da spreci zaobilazenje odobravanja; nova UPDATE politika za odobravanje zahteva (tiket 08) |
 | 012 | `012_realtime_brisanje_poruka.sql` | `messages` prebacena na `REPLICA IDENTITY FULL` da bi Realtime DELETE dogadjaji nosili dovoljno kolona za RLS proveru (tiket 09) |
+| 014 | `014_avatars_owner.sql` | **Popravka tiketa 03:** politike nad `storage.objects` prebačene sa `auth.uid()` na `owner_id` (u Storage kontekstu `auth.uid()` je `NULL`) + SELECT politika zbog `upsert` |
 
 Konvencija imenovanja za nove: `NNN_kratak_opis.sql`, sledeći slobodan broj.
+
+> Broj `013` je namerno preskočen — migracija sa tim brojem je napisana tokom istrage
+> problema iz sekcije 8, ali ju je `014` u potpunosti zamenila pre nego što je pokrenuta.
 
 ---
 
@@ -355,14 +359,18 @@ uvek isto ime. Otpremanje nove slike koristi `upsert: true` i prepisuje stari fa
 istoj putanji, pa se stare slike ne gomilaju u skladištu. `avatar_url` u `profiles` je
 javni URL sa `?v=<timestamp>` dodatkom radi trenutnog osvežavanja prikaza posle zamene.
 
-**Politike nad `storage.objects`** (`to public` posle `007_avatars_rls_fix.sql`,
-INSERT/UPDATE/DELETE): `bucket_id = 'avatars' and (storage.foldername(name))[1] =
-auth.uid()::text` — korisnik sme da menja isključivo fajlove u sopstvenom folderu
-(`<svoj_user_id>/...`), što znači da može postaviti sliku samo na svoj profil.
-`to public` umesto `to authenticated` je bio pokušaj popravke (vidi ⚠️ ispod) — sam
-uslov ostaje bezbedan jer je `auth.uid()` `NULL` za neprijavljen zahtev, pa provera
-nikad nije tačna za nekoga ko nije ulogovan. Posebna SELECT politika nije potrebna jer
-je bucket javan.
+**Politike nad `storage.objects`** (`to public`, SELECT/INSERT/UPDATE/DELETE, konačan
+oblik u `014_avatars_owner.sql`):
+
+```sql
+bucket_id = 'avatars' and (storage.foldername(name))[1] = owner_id::text
+```
+
+Korisnik sme da dira isključivo fajlove u sopstvenom folderu (`<svoj_user_id>/...`),
+dakle može postaviti sliku samo na svoj profil. SELECT politika je potrebna zbog
+`upsert: true` — zamena slike ide kroz UPDATE granu, pa servis prvo mora da pronađe
+postojeći red. Javno čitanje avatara ne ide kroz RLS (bucket je `public = true`), pa
+SELECT politika ne utiče na to da li korisnici vide tuđe slike.
 
 **Tok postavljanja:** `avatar-upload.tsx` (Client Component) šalje fajl kroz Server
 Action `sacuvajAvatar()` (`profil/actions.ts`) koji otprema u Storage i upisuje javni URL
@@ -370,34 +378,50 @@ u `profiles.avatar_url`. Putanja `<user_id>/avatar` se gradi iz `getUser()`, nik
 ulaza klijenta. Zbog veličine slika (do 5MB) `bodySizeLimit` za Server Actions je podignut
 u `next.config.ts`.
 
-### ⚠️ Poznat problem — otpremanje trenutno ne radi (27.08.2026)
+### ⚠️ `auth.uid()` NE radi u politikama nad `storage.objects`
 
-Svaki pokušaj otpremanja pada sa `StorageApiError: new row violates row-level security
-policy` (status 400, `statusCode: '403'`), iako je sve provereno ispravno:
+Ovo je najvažnija stvar koju treba znati pre pisanja bilo koje nove Storage politike
+u ovom projektu, i uzrok dugotrajne greške pri implementaciji tiketa 03.
 
-- JWT je validan, `auth.uid()` se poklapa sa putanjom fajla (potvrđeno ispisom claim-ova
-  na serveru: `sub`, `role: authenticated`, `aud: authenticated` su tačni).
-- Identičan `insert into storage.objects (...)` **direktno u SQL Editoru**, sa
-  `set local role authenticated` i istim `request.jwt.claims`, **prolazi bez greške**
-  (i sa i bez eksplicitnog `owner`).
-- Ne postoje dodatni okidači (triggeri) koji bi mogli da smetaju — samo
-  `protect_objects_delete` i `update_objects_updated_at`, oba standardna i nepovezana.
-- Isprobano bez uspeha: otpremanje direktno iz browser klijenta; otpremanje kroz Server
-  Action (server-side klijent, ista sesija koja radi za sve ostale upite); restart
-  Supabase projekta; promena politika sa `to authenticated` na `to public`.
+**Simptom:** svako otpremanje pada sa `StorageApiError: new row violates row-level
+security policy` (HTTP 400, `statusCode: '403'`, `code: AccessDenied`), iako je politika
+naizgled tačna.
 
-Zaključak: problem je specifičan za Storage servis ovog projekta (razlikuje se od
-ponašanja PostgREST-a za iste kredencijale), verovatno na nivou kako Storage API
-prosleđuje JWT/rolu ka Postgres-u. Sledeći koraci kad se nastavi:
+**Uzrok:** unutar zahteva koji dolazi kroz Storage API, `auth.uid()` vraća `NULL` — Storage
+servis ovog projekta ne prosleđuje `request.jwt.claims` u SQL kontekst. Zbog toga uslov
+`... = auth.uid()::text` nikad nije tačan i politika uvek odbija upis.
 
-1. Ukloniti `auth.uid()` proveru iz politike **privremeno** (samo `bucket_id = 'avatars'`)
-   da se potvrdi da je baš ta provera uzrok, ne nešto drugo (mime tip, `file_size_limit`
-   i sl.) — **vratiti punu proveru odmah posle testa**, ovo NIJE bezbedno stanje za trajno
-   ostavljanje.
-2. Ako se time potvrdi da je uzrok `auth.uid()`, proveriti Supabase Storage logove
-   (Dashboard → Logs → Storage Logs) za stvarnu grešku sa servera u trenutku zahteva.
-3. Ako ni to ne razjasni, kontaktirati Supabase support — moguće je da je u pitanju
-   projekat-specifična infrastrukturna greška koja se ne može rešiti iz aplikacije/SQL-a.
+Ovo **nije** greška u aplikaciji i ne zavisi od toga odakle se poziva. Isključeno je
+redom, merenjem a ne nagađanjem:
+
+| Provereno | Nalaz |
+|---|---|
+| Validnost JWT-a (`sub`, `role`, `aud` ispisani na serveru) | ispravan, `role: authenticated`, `sub` = ID korisnika |
+| Isti token kroz PostgREST (`update` nad `profiles`) | radi, HTTP 200 |
+| Isti `insert` direktno u SQL Editoru uz `set local role authenticated` + `request.jwt.claims` | prolazi |
+| Otpremanje iz browsera / iz Server Action-a / uz ručno postavljen `Authorization` header | svi padaju isto |
+| Politike `to authenticated` → `to public` | bez promene (isključuje rolu kao uzrok) |
+| Restart Supabase projekta | bez promene |
+| Dodatni okidači na `storage.objects` | samo standardni `protect_objects_delete`, `update_objects_updated_at` |
+| `storage.prefixes` (sumnja na noviji Storage) | tabela ne postoji u ovoj verziji |
+| Politika **bez** `auth.uid()` provere (`with check (bucket_id = 'avatars')`) | **otpremanje odmah prolazi** — dokaz da je uzrok baš `auth.uid()` |
+
+**Rešenje:** koristiti `owner_id` umesto `auth.uid()`. Tu kolonu popunjava sam Storage
+servis iz tokena i klijent na nju ne može da utiče — provereno da sadrži tačan ID
+korisnika koji je otpremio fajl:
+
+```
+name:     b393bb8f-…-df5f3b82e530/avatar
+owner_id: b393bb8f-…-df5f3b82e530
+```
+
+Uslov `(storage.foldername(name))[1] = owner_id::text` traži da se **folder poklapa sa
+vlasnikom reda**, čime se dobija ista garancija kao sa `auth.uid()` — korisnik piše samo
+u svoj folder — bez oslanjanja na claim-ove kojih u Storage kontekstu nema.
+
+> Zaostavština istrage: `007_avatars_rls_fix.sql` (prelazak na `to public`) je bio
+> pokušaj popravke koji nije bio uzrok, ali je zadržan jer je bezopasan i `014` gradi
+> na njemu. Prava popravka je `014_avatars_owner.sql`.
 
 ---
 
