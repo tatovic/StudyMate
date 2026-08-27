@@ -6,9 +6,7 @@ grupe sa dugom istorijom učitavaju starije poruke na zahtev umesto da se sve do
 
 **Blokiran od:** 08.
 
-**Status:** zavrseno — potrebno pokrenuti migraciju `012_realtime_brisanje_poruka.sql` u
-Supabase (menja `REPLICA IDENTITY` na `messages`, neophodno da DELETE stigne uživo
-ostalim članovima — vidi `db.md`, sekcija 3.6)
+**Status:** zavrseno
 
 ## Kriterijumi prihvatanja
 
@@ -17,7 +15,8 @@ ostalim članovima — vidi `db.md`, sekcija 3.6)
 - [x] Uzastopne poruke istog autora se grupišu bez ponavljanja imena
 - [x] Korisnik briše sopstvenu poruku uz potvrdu
 - [x] Obrisana poruka nestaje i kod ostalih članova uživo, bez osvežavanja
-      (zahteva `REPLICA IDENTITY FULL` — vidi napomenu uz Status)
+      (zahteva `REPLICA IDENTITY FULL` na `messages`, migracija
+      `012_realtime_brisanje_poruka.sql` — vidi `db.md`, sekcija 3.6)
 - [x] Korisnik ne može obrisati tuđu poruku; pokušaj je odbijen i na nivou baze
       (RLS politika "brises svoje poruke" iz `002_rls.sql`, pokriveno testovima u
       `tests/rls/pristup-podacima.test.ts`)
