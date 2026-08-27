@@ -7,17 +7,17 @@ sve njene poruke.
 
 **Blokiran od:** 06.
 
-**Status:** spremno
+**Status:** zavrseno
 
 ## Kriterijumi prihvatanja
 
-- [ ] Vlasnik na strani grupe vidi kontrole za izmenu koje ostali članovi ne vide
-- [ ] Vlasnik menja naziv, opis, predmet, maksimalan broj članova i vidljivost grupe
-- [ ] Maksimalan broj članova ne može biti manji od trenutnog broja članova
-- [ ] Vlasnik uklanja člana iz grupe; uklonjeni član gubi pristup chatu
-- [ ] Vlasnik ne može ukloniti samog sebe
-- [ ] Vlasnik briše grupu uz eksplicitnu potvrdu koja navodi posledice
-- [ ] Brisanjem grupe brišu se i njena članstva i poruke
-- [ ] Član napušta grupu uz potvrdu; vlasniku ta opcija nije ponuđena
-- [ ] Pokušaj izmene ili brisanja tuđe grupe je odbijen i na nivou baze, ne samo u UI
-- [ ] Posle brisanja korisnik završava na listi grupa sa porukom o uspehu
+- [x] Vlasnik na strani grupe vidi kontrole za izmenu koje ostali članovi ne vide
+- [x] Vlasnik menja naziv, opis, predmet, maksimalan broj članova i vidljivost grupe
+- [x] Maksimalan broj članova ne može biti manji od trenutnog broja članova
+- [x] Vlasnik uklanja člana iz grupe; uklonjeni član gubi pristup chatu
+- [x] Vlasnik ne može ukloniti samog sebe
+- [x] Vlasnik briše grupu uz eksplicitnu potvrdu koja navodi posledice
+- [x] Brisanjem grupe brišu se i njena članstva i poruke
+- [x] Član napušta grupu uz potvrdu; vlasniku ta opcija nije ponuđena
+- [x] Pokušaj izmene ili brisanja tuđe grupe je odbijen i na nivou baze, ne samo u UI
+- [x] Posle brisanja korisnik završava na listi grupa sa porukom o uspehu

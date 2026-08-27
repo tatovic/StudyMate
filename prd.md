@@ -168,7 +168,7 @@ odgovarajućem fajlu iz `tickets/` u `zavrseno`.
 - [x] **04** — [Javni profil drugog korisnika](./tickets/04-javni-profil-korisnika.md)
 - [ ] **05** — [Pretraga i filtriranje korisnika](./tickets/05-pretraga-korisnika.md)
 - [ ] **06** — [Pretraga i filtriranje grupa](./tickets/06-pretraga-grupa.md)
-- [ ] **07** — [Upravljanje grupom za vlasnika](./tickets/07-upravljanje-grupom.md)
+- [x] **07** — [Upravljanje grupom za vlasnika](./tickets/07-upravljanje-grupom.md)
 - [ ] **08** — [Privatne grupe sa odobravanjem članstva](./tickets/08-privatne-grupe.md)
 - [ ] **09** — [Dorada chata: vreme, brisanje, starije poruke](./tickets/09-dorada-chata.md)
 - [ ] **10** — [Prazna stanja, učitavanje i obrada grešaka](./tickets/10-prazna-stanja-i-greske.md)

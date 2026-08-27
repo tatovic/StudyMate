@@ -3,7 +3,13 @@ import { createClient } from '@/lib/supabase/server'
 import { NovaGrupa } from './nova-grupa'
 import { pridruziSe } from './actions'
 
-type SearchParams = { q?: string; predmet?: string; moji?: string; slobodne?: string }
+type SearchParams = {
+  q?: string
+  predmet?: string
+  moji?: string
+  slobodne?: string
+  obrisana?: string
+}
 
 function url(params: SearchParams) {
   const usp = new URLSearchParams()
@@ -91,6 +97,12 @@ export default async function GrupePage({
           </p>
         </div>
       </header>
+
+      {sp.obrisana === '1' && (
+        <p className="rounded-md bg-green-50 px-3 py-2 text-sm text-green-800">
+          Grupa je uspesno obrisana.
+        </p>
+      )}
 
       <NovaGrupa predmeti={predmeti ?? []} />
 

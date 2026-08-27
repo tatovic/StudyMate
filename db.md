@@ -22,6 +22,7 @@ Pokreću se redom u Supabase Dashboard → SQL Editor.
 | 007 | `007_avatars_rls_fix.sql` | Politike iz 006 promenjene na `to public` (pokusaj popravke, vidi sekciju 8 — jos ne radi) |
 | 008 | `008_javni_profil.sql` | Dodatna RLS politika: clanstva u javnim grupama vidljiva svim prijavljenima (za javni profil, tiket 04) |
 | 009 | `009_pretraga_korisnika.sql` | RPC funkcija `pretrazi_korisnike` (za pretragu i filtriranje korisnika, tiket 05) |
+| 010 | `010_upravljanje_grupom.sql` | Dodatna RLS politika: vlasnik grupe sme da ukloni clanstvo bilo kog drugog clana (za upravljanje grupom, tiket 07) |
 
 Konvencija imenovanja za nove: `NNN_kratak_opis.sql`, sledeći slobodan broj.
 
@@ -185,7 +186,7 @@ Ovo je standardni Supabase obrazac.
 | `subjects` | svi prijavljeni | — | — | — |
 | `user_subjects` | svi prijavljeni | samo sebi | — | samo sebi |
 | `groups` | javne + svoje + gde si član | kao vlasnik | samo vlasnik | samo vlasnik |
-| `group_members` | svoja članstva + članstva svojih grupa + članstva javnih grupa (od 008, za javni profil) | samo sebe | — | samo sebe |
+| `group_members` | svoja članstva + članstva svojih grupa + članstva javnih grupa (od 008, za javni profil) | samo sebe | — | samo sebe + vlasnik grupe uklanja bilo kog člana (od 010, tiket 07) |
 | `messages` | samo u svojim grupama | samo u svojim grupama, kao ti | — | samo svoje |
 
 Sve politike su `TO authenticated`. Neprijavljen korisnik ne vidi ništa.
@@ -205,6 +206,11 @@ Sve politike su `TO authenticated`. Neprijavljen korisnik ne vidi ništa.
   članstvo posmatrača. `preporuci_grupe` je i dalje `security invoker` i ne koristi ovu
   politiku direktno. Nedostatak N-2 u `prd.md` ostaje za privatne grupe i za UI koji
   broj članova još ne prikazuje na osnovu ovoga; rešava se u tiketu 06.
+- **Politika iz 010 ne sprečava vlasnika da obriše sopstveno članstvo** — to i dalje
+  dozvoljava postojeća "napustas grupu sam" (svako sme da obriše svoj red). Pravilo
+  "vlasnik ne može ukloniti samog sebe" iz tiketa 07 je zato provera u Server Action-u
+  (`ukloniClana`), ne RLS politika — inherentno ne može biti RLS jer bi to sprečilo i
+  legitimno napuštanje grupe od strane vlasnika (koje UI ionako ne nudi).
 
 ---
 
