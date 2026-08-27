@@ -6,6 +6,7 @@ import { logout } from '@/app/login/actions'
 const linkovi = [
   { href: '/dashboard', label: 'Pocetna' },
   { href: '/predmeti', label: 'Predmeti' },
+  { href: '/korisnici', label: 'Korisnici' },
   { href: '/grupe', label: 'Grupe' },
   { href: '/profil', label: 'Profil' },
 ]

@@ -240,6 +240,18 @@ export type Database = {
           max_clanova: number
         }[]
       }
+      pretrazi_korisnike: {
+        Args: { pretraga?: string | null; p_subject_id?: number | null; p_nivo?: string | null }
+        Returns: {
+          id: string
+          ime: string
+          skola: string | null
+          opis: string | null
+          avatar_url: string | null
+          zajednicki: number
+          predmeti: string[]
+        }[]
+      }
     }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>

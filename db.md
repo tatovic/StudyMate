@@ -21,6 +21,7 @@ Pokreću se redom u Supabase Dashboard → SQL Editor.
 | 006 | `006_avatars.sql` | Storage bucket `avatars` i politike pristupa |
 | 007 | `007_avatars_rls_fix.sql` | Politike iz 006 promenjene na `to public` (pokusaj popravke, vidi sekciju 8 — jos ne radi) |
 | 008 | `008_javni_profil.sql` | Dodatna RLS politika: clanstva u javnim grupama vidljiva svim prijavljenima (za javni profil, tiket 04) |
+| 009 | `009_pretraga_korisnika.sql` | RPC funkcija `pretrazi_korisnike` (za pretragu i filtriranje korisnika, tiket 05) |
 
 Konvencija imenovanja za nove: `NNN_kratak_opis.sql`, sledeći slobodan broj.
 
@@ -233,6 +234,29 @@ Javne grupe iz predmeta koje korisnik uči, u kojima još nije član i koje nisu
 
 ```ts
 const { data } = await supabase.rpc('preporuci_grupe', { limit_n: 10 })
+```
+
+### 5.3 `pretrazi_korisnike(pretraga text default null, p_subject_id bigint default null, p_nivo text default null)`
+
+Za razliku od `pronadji_slicne`, vraća **sve** korisnike (osim pozivaoca), ne samo one sa
+bar jednim zajedničkim predmetom — koristi se za stranicu pretrage (tiket 05), gde
+korisnik može tražiti bilo koga po imenu ili predmetu, bez ograničenja na preklapanje.
+
+**Vraća:** `id, ime, skola, opis, avatar_url, zajednicki (bigint), predmeti (text[])` —
+`predmeti` je spisak predmeta zajedničkih sa pozivaocem (isto značenje kao u
+`pronadji_slicne`), ne svi predmeti tog korisnika.
+
+**Logika:** `pretraga` filtrira po `ime ilike '%...%'` (bez razlike velikih/malih slova).
+`p_subject_id` filtrira samo korisnike koji uče taj predmet; `p_nivo` se primenjuje
+isključivo u kombinaciji sa `p_subject_id` (nivo tog korisnika baš za taj predmet).
+`zajednicki`/`predmeti` se računaju istim self-join obrascem kao u `pronadji_slicne`.
+
+```ts
+const { data } = await supabase.rpc('pretrazi_korisnike', {
+  pretraga: 'ana',
+  p_subject_id: 3,
+  p_nivo: 'srednji',
+})
 ```
 
 > Pri dodavanju nove RPC funkcije obavezno dodaj i
