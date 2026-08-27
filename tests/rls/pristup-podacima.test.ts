@@ -215,6 +215,69 @@ describe('Pravila pristupa (RLS)', () => {
     expect(poruke).toEqual([])
   })
 
+  it('nečlan vidi privatnu grupu u pretrazi po nazivu (tiket 08)', async () => {
+    const { data, error } = await gost.supabase
+      .from('groups')
+      .select('id, naziv')
+      .eq('id', privatnaGroupId)
+      .maybeSingle()
+    expect(error).toBeNull()
+    expect(data?.naziv).toBe('[TEST RLS] privatna grupa')
+  })
+
+  it('korisnik salje zahtev za clanstvo u privatnu grupu (tiket 08)', async () => {
+    const { data, error } = await gost.supabase
+      .from('group_members')
+      .insert({ group_id: privatnaGroupId, user_id: gost.userId, uloga: 'clan', status: 'na_cekanju' })
+      .select('group_id, user_id, status')
+    expect(error).toBeNull()
+    expect(data).toEqual([{ group_id: privatnaGroupId, user_id: gost.userId, status: 'na_cekanju' }])
+  })
+
+  it('isti korisnik ne moze poslati isti zahtev dvaput (primarni kljuc)', async () => {
+    const { error } = await gost.supabase
+      .from('group_members')
+      .insert({ group_id: privatnaGroupId, user_id: gost.userId, uloga: 'clan', status: 'na_cekanju' })
+    expect(error).not.toBeNull()
+  })
+
+  it('korisnik ne moze zaobici odobravanje i direktno postati aktivan clan privatne grupe', async () => {
+    const { data } = await clan2.supabase
+      .from('group_members')
+      .insert({ group_id: privatnaGroupId, user_id: clan2.userId, uloga: 'clan', status: 'aktivan' })
+      .select()
+    expect(data).toEqual([])
+  })
+
+  it('obican clan ne moze odobriti tudji zahtev za clanstvo', async () => {
+    const { data } = await clan1.supabase
+      .from('group_members')
+      .update({ status: 'aktivan' })
+      .eq('group_id', privatnaGroupId)
+      .eq('user_id', gost.userId)
+      .select()
+    expect(data).toEqual([])
+
+    const { data: zahtev } = await vlasnik.supabase
+      .from('group_members')
+      .select('status')
+      .eq('group_id', privatnaGroupId)
+      .eq('user_id', gost.userId)
+      .single()
+    expect(zahtev?.status).toBe('na_cekanju')
+  })
+
+  it('vlasnik odobrava zahtev za clanstvo (tiket 08)', async () => {
+    const { data, error } = await vlasnik.supabase
+      .from('group_members')
+      .update({ status: 'aktivan' })
+      .eq('group_id', privatnaGroupId)
+      .eq('user_id', gost.userId)
+      .select('status')
+    expect(error).toBeNull()
+    expect(data).toEqual([{ status: 'aktivan' }])
+  })
+
   it('neprijavljen posetilac ne dobija nijedan red iz baze', async () => {
     const anon = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false } })
     const { data, error } = await anon.from('subjects').select('*')

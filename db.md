@@ -23,6 +23,7 @@ Pokreću se redom u Supabase Dashboard → SQL Editor.
 | 008 | `008_javni_profil.sql` | Dodatna RLS politika: clanstva u javnim grupama vidljiva svim prijavljenima (za javni profil, tiket 04) |
 | 009 | `009_pretraga_korisnika.sql` | RPC funkcija `pretrazi_korisnike` (za pretragu i filtriranje korisnika, tiket 05) |
 | 010 | `010_upravljanje_grupom.sql` | Dodatna RLS politika: vlasnik grupe sme da ukloni clanstvo bilo kog drugog clana (za upravljanje grupom, tiket 07) |
+| 011 | `011_privatne_grupe.sql` | Privatne grupe vidljive svima u pretrazi; INSERT politika nad `group_members` **zamenjena** da spreci zaobilazenje odobravanja; nova UPDATE politika za odobravanje zahteva (tiket 08) |
 
 Konvencija imenovanja za nove: `NNN_kratak_opis.sql`, sledeći slobodan broj.
 
@@ -185,16 +186,19 @@ Ovo je standardni Supabase obrazac.
 | `profiles` | svi prijavljeni | (trigger) | samo svoj (`auth.uid() = id`) | — |
 | `subjects` | svi prijavljeni | — | — | — |
 | `user_subjects` | svi prijavljeni | samo sebi | — | samo sebi |
-| `groups` | javne + svoje + gde si član | kao vlasnik | samo vlasnik | samo vlasnik |
-| `group_members` | svoja članstva + članstva svojih grupa + članstva javnih grupa (od 008, za javni profil) | samo sebe | — | samo sebe + vlasnik grupe uklanja bilo kog člana (od 010, tiket 07) |
+| `groups` | sve grupe, svima (od 011, tiket 08 — i privatne su vidljive po nazivu) | kao vlasnik | samo vlasnik | samo vlasnik |
+| `group_members` | svoja članstva + članstva svojih grupa + članstva javnih grupa (od 008, za javni profil) | samo sebe, i to `na_cekanju` uvek ili `aktivan` samo u javnoj grupi (zamenjeno u 011, tiket 08) | vlasnik odobrava zahtev na_cekanju → aktivan (od 011, tiket 08) | samo sebe + vlasnik grupe uklanja bilo kog člana, uključujući zahteve na čekanju (od 010, tiket 07) |
 | `messages` | samo u svojim grupama | samo u svojim grupama, kao ti | — | samo svoje |
 
 Sve politike su `TO authenticated`. Neprijavljen korisnik ne vidi ništa.
 
 **Posledice koje treba imati na umu pri pisanju upita:**
 
-- Upit nad `groups` za privatnu grupu čiji nisi član vraća prazno — u kodu se to
-  tretira kao `notFound()`, ne kao greška.
+- **Od migracije 011 (tiket 08) `groups` SELECT vraća sve grupe, i privatne**, da bi
+  korisnik uopšte mogao da naiđe na privatnu grupu i pošalje zahtev za članstvo. Upit
+  nad `groups` za grupu koja ne postoji i dalje vraća prazno — to se i dalje tretira kao
+  `notFound()`. Ono što RLS i dalje krije za nečlana privatne grupe je sadržaj: `messages`
+  i (osim sopstvenog reda) `group_members`.
 - Učitavanje poruka ima smisla samo ako je korisnik član; u suprotnom RLS vrati prazan niz.
 - `profiles` je vidljiv svim prijavljenima jer je to javni profil. Email **nije** u
   `profiles` i ne izlaže se drugima.
@@ -211,6 +215,24 @@ Sve politike su `TO authenticated`. Neprijavljen korisnik ne vidi ništa.
   "vlasnik ne može ukloniti samog sebe" iz tiketa 07 je zato provera u Server Action-u
   (`ukloniClana`), ne RLS politika — inherentno ne može biti RLS jer bi to sprečilo i
   legitimno napuštanje grupe od strane vlasnika (koje UI ionako ne nudi).
+- **Tiket 08 — privatne grupe sa odobravanjem članstva.** INSERT politika nad
+  `group_members` iz 002_rls.sql ("pridruzujes se sam") je u 011 **zamenjena**, ne
+  dopunjena — dodatna permisivna politika bi se samo OR-ovala sa postojećom i ne bi
+  ograničila ništa, pa je jedini način da se stvarno zabrani insert bio brisanje i
+  ponovno pravljenje. Nova verzija dozvoljava insert sopstvenog reda sa
+  `status = 'na_cekanju'` za bilo koju grupu, ili sa `status = 'aktivan'` samo ako je
+  ciljna grupa javna — sprečava zaobilaženje odobravanja direktnim insert-om mimo
+  Server Action-a. Odobravanje (`na_cekanju` → `aktivan`) je nova UPDATE politika,
+  ograničena na vlasnika grupe i na redove koji su trenutno `na_cekanju`. Odbijanje
+  zahteva ne treba novu politiku jer postojeća DELETE politika iz 010 već dozvoljava
+  vlasniku da obriše bilo koje članstvo svoje grupe, bez obzira na status. Provera da
+  odobravanje ne bi premašilo `max_clanova` je u Server Action-u (`odobriZahtev`), isti
+  razlog kao kod `izmeniGrupu` u tiketu 07 — zavisi od trenutnog broja aktivnih članova u
+  trenutku izvršavanja, ne može biti CHECK ograničenje. Zahtevi na čekanju se ne broje u
+  popunjenost jer se svuda eksplicitno filtrira `status = 'aktivan'`. Vlasnik vidi tuđe
+  zahteve na čekanju bez ikakve nove SELECT politike — postojeća "vidis clanstva svojih
+  grupa" već dozvoljava čitanje svih redova grupe čiji si aktivan član (`je_clan`), a
+  vlasnik je uvek aktivan član sopstvene grupe.
 
 ---
 

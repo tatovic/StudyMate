@@ -2,20 +2,30 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Avatar } from '@/components/avatar'
 import { createClient } from '@/lib/supabase/server'
-import { napustiGrupu, obrisiGrupu, pridruziSe, ukloniClana } from '../actions'
+import {
+  napustiGrupu,
+  obrisiGrupu,
+  odbijZahtev,
+  odobriZahtev,
+  pridruziSe,
+  ukloniClana,
+} from '../actions'
 import { Chat, type Poruka } from './chat'
 import { IzmeniGrupu } from './izmeni-grupu'
 import { PotvrdaDugme } from './potvrda-dugme'
 
-// Next.js 16: params je Promise i mora se await-ovati.
+// Next.js 16: params i searchParams su Promise i moraju se await-ovati.
 export default async function GrupaPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ zahtev_greska?: string }>
 }) {
   const { id } = await params
   const groupId = Number(id)
   if (Number.isNaN(groupId)) notFound()
+  const sp = await searchParams
 
   const supabase = await createClient()
   const {
@@ -45,6 +55,39 @@ export default async function GrupaPage({
 
   const jeClan = (clanovi ?? []).some((c) => c.user_id === user!.id)
   const puna = (clanovi?.length ?? 0) >= grupa.max_clanova
+
+  // Sopstveni zahtev na cekanju - ako postoji, korisnik vec ceka odobrenje i ne
+  // treba mu se ponuditi dugme za pridruzivanje niti pristup chatu (tiket 08).
+  const { data: mojeClanstvo } = await supabase
+    .from('group_members')
+    .select('status')
+    .eq('group_id', groupId)
+    .eq('user_id', user!.id)
+    .maybeSingle()
+  const zahtevNaCekanju = mojeClanstvo?.status === 'na_cekanju'
+
+  // Zahtevi na cekanju - vidljivi samo vlasniku (RLS: je_clan(group_id) je tacno
+  // za vlasnika jer je i sam aktivan clan, pa moze da procita sve redove grupe,
+  // ukljucujuci tudje zahteve na cekanju - vidi db.md, sekcija 4.3).
+  const { data: zahtevi } = jeVlasnik
+    ? await supabase
+        .from('group_members')
+        .select('user_id, joined_at, profiles(ime, skola, avatar_url)')
+        .eq('group_id', groupId)
+        .eq('status', 'na_cekanju')
+        .order('joined_at', { ascending: true })
+    : { data: null }
+
+  const zahteviIds = (zahtevi ?? []).map((z) => z.user_id)
+  const { data: zahteviPredmetiSirovi } = zahteviIds.length
+    ? await supabase.from('user_subjects').select('user_id, subjects(naziv)').in('user_id', zahteviIds)
+    : { data: null }
+
+  const zahteviPredmeti: Record<string, string[]> = {}
+  for (const p of zahteviPredmetiSirovi ?? []) {
+    if (!p.subjects) continue
+    ;(zahteviPredmeti[p.user_id] ??= []).push(p.subjects.naziv)
+  }
 
   const imena: Record<string, string> = Object.fromEntries(
     (clanovi ?? []).map((c) => [c.user_id, c.profiles?.ime ?? 'Nepoznat'])
@@ -89,6 +132,17 @@ export default async function GrupaPage({
             >
               <input type="hidden" name="group_id" value={grupa.id} />
             </PotvrdaDugme>
+          ) : zahtevNaCekanju ? (
+            <span className="shrink-0 text-sm text-gray-500">
+              Zahtev poslat, ceka odobrenje vlasnika
+            </span>
+          ) : !grupa.is_public ? (
+            <form action={pridruziSe}>
+              <input type="hidden" name="group_id" value={grupa.id} />
+              <button className="shrink-0 rounded-md bg-black px-3 py-1.5 text-sm text-white">
+                Zatrazi pristup
+              </button>
+            </form>
           ) : puna ? (
             <span className="shrink-0 text-sm text-gray-500">Grupa je popunjena</span>
           ) : (
@@ -100,6 +154,13 @@ export default async function GrupaPage({
             </form>
           ))}
       </header>
+
+      {sp.zahtev_greska === 'puna' && (
+        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">
+          Zahtev nije odobren - grupa je vec popunjena. Povecaj maksimalan broj clanova ili
+          ukloni nekog clana da bi napravio mesta.
+        </p>
+      )}
 
       {jeVlasnik && (
         <section className="flex flex-wrap items-start justify-between gap-4 rounded-md border p-4">
@@ -129,6 +190,56 @@ export default async function GrupaPage({
               <input type="hidden" name="group_id" value={grupa.id} />
             </PotvrdaDugme>
           </div>
+        </section>
+      )}
+
+      {jeVlasnik && !grupa.is_public && (
+        <section className="space-y-2">
+          <h2 className="text-lg font-medium">Zahtevi za clanstvo</h2>
+          {!zahtevi?.length ? (
+            <p className="text-sm text-gray-600">Trenutno nema zahteva na cekanju.</p>
+          ) : (
+            <ul className="divide-y rounded-md border">
+              {zahtevi.map((z) => (
+                <li key={z.user_id} className="flex items-center justify-between gap-4 p-3">
+                  <Link href={`/profil/${z.user_id}`} className="flex min-w-0 items-center gap-3">
+                    <Avatar
+                      url={z.profiles?.avatar_url ?? null}
+                      ime={z.profiles?.ime ?? 'Nepoznat'}
+                      size={36}
+                    />
+                    <div className="min-w-0">
+                      <p className="font-medium hover:underline">{z.profiles?.ime}</p>
+                      {z.profiles?.skola && (
+                        <p className="text-xs text-gray-500">{z.profiles.skola}</p>
+                      )}
+                      {zahteviPredmeti[z.user_id]?.length > 0 && (
+                        <p className="truncate text-xs text-gray-500">
+                          {zahteviPredmeti[z.user_id].join(', ')}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                  <div className="flex shrink-0 gap-2">
+                    <form action={odobriZahtev}>
+                      <input type="hidden" name="group_id" value={grupa.id} />
+                      <input type="hidden" name="user_id" value={z.user_id} />
+                      <button className="rounded-md bg-black px-3 py-1.5 text-sm text-white">
+                        Prihvati
+                      </button>
+                    </form>
+                    <form action={odbijZahtev}>
+                      <input type="hidden" name="group_id" value={grupa.id} />
+                      <input type="hidden" name="user_id" value={z.user_id} />
+                      <button className="rounded-md border border-red-300 px-3 py-1.5 text-sm text-red-700">
+                        Odbij
+                      </button>
+                    </form>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       )}
 
@@ -176,6 +287,10 @@ export default async function GrupaPage({
             pocetne={poruke}
             imenaClanova={imena}
           />
+        ) : zahtevNaCekanju ? (
+          <p className="text-sm text-gray-600">
+            Zahtev za clanstvo ceka odobrenje vlasnika. Videces poruke kad budes odobren.
+          </p>
         ) : (
           <p className="text-sm text-gray-600">
             Pridruzi se grupi da bi video i pisao poruke.

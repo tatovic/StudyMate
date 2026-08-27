@@ -56,11 +56,22 @@ export async function pridruziSe(formData: FormData) {
 
   const groupId = Number(formData.get('group_id'))
 
+  const { data: grupa } = await supabase
+    .from('groups')
+    .select('is_public')
+    .eq('id', groupId)
+    .single()
+  if (!grupa) return
+
+  // Javnoj grupi se pridruzujes odmah; privatnoj samo saljes zahtev na cekanju
+  // koji vlasnik odobrava ili odbija (tiket 08). Ako zahtev vec postoji,
+  // primarni kljuc (group_id, user_id) odbija insert - tiho se ignorise,
+  // isto kao i ostale greske u ovoj datoteci.
   await supabase.from('group_members').insert({
     group_id: groupId,
     user_id: user.id,
     uloga: 'clan',
-    status: 'aktivan',
+    status: grupa.is_public ? 'aktivan' : 'na_cekanju',
   })
 
   revalidatePath('/grupe')
@@ -158,6 +169,70 @@ export async function ukloniClana(formData: FormData) {
 
   revalidatePath(`/grupe/${groupId}`)
   revalidatePath('/grupe')
+}
+
+export async function odobriZahtev(formData: FormData) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return
+
+  const groupId = Number(formData.get('group_id'))
+  const podnosilacId = String(formData.get('user_id'))
+
+  const { data: grupa } = await supabase
+    .from('groups')
+    .select('max_clanova')
+    .eq('id', groupId)
+    .eq('owner_id', user.id)
+    .single()
+  if (!grupa) return
+
+  // Zahtev se ne moze odobriti ako bi grupa time premasila max_clanova - isti
+  // razlog kao kod izmene max_clanova (zavisi od trenutnog stanja, ne moze biti
+  // CHECK ogranicenje). Broji se samo status='aktivan', zahtevi na cekanju se
+  // ne racunaju u popunjenost.
+  const { count } = await supabase
+    .from('group_members')
+    .select('user_id', { count: 'exact', head: true })
+    .eq('group_id', groupId)
+    .eq('status', 'aktivan')
+
+  if (count !== null && count >= grupa.max_clanova) {
+    redirect(`/grupe/${groupId}?zahtev_greska=puna`)
+  }
+
+  await supabase
+    .from('group_members')
+    .update({ status: 'aktivan' })
+    .eq('group_id', groupId)
+    .eq('user_id', podnosilacId)
+    .eq('status', 'na_cekanju')
+
+  revalidatePath(`/grupe/${groupId}`)
+  revalidatePath('/grupe')
+  revalidatePath('/dashboard')
+}
+
+export async function odbijZahtev(formData: FormData) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return
+
+  const groupId = Number(formData.get('group_id'))
+  const podnosilacId = String(formData.get('user_id'))
+
+  await supabase
+    .from('group_members')
+    .delete()
+    .eq('group_id', groupId)
+    .eq('user_id', podnosilacId)
+    .eq('status', 'na_cekanju')
+
+  revalidatePath(`/grupe/${groupId}`)
 }
 
 export async function obrisiGrupu(formData: FormData) {

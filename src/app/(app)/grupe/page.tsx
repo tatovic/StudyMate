@@ -42,11 +42,19 @@ export default async function GrupePage({
   const [{ data: predmeti }, { data: mojiPredmetiRedovi }, { data: mojaClanstva }] = await Promise.all([
     supabase.from('subjects').select('id, naziv').order('naziv'),
     supabase.from('user_subjects').select('subject_id').eq('user_id', user!.id),
-    supabase.from('group_members').select('group_id').eq('user_id', user!.id),
+    supabase.from('group_members').select('group_id, status').eq('user_id', user!.id),
   ])
 
   const mojiPredmetiIds = new Set((mojiPredmetiRedovi ?? []).map((r) => r.subject_id))
-  const mojeGrupe = new Set((mojaClanstva ?? []).map((c) => c.group_id))
+  // Privatna grupa je sada vidljiva u pretrazi svima (tiket 08), pa "clan" mora
+  // da znaci aktivno clanstvo - zahtev na cekanju se prikazuje posebno, ne kao
+  // "clan" i ne racuna se u popunjenost.
+  const mojeGrupe = new Set(
+    (mojaClanstva ?? []).filter((c) => c.status === 'aktivan').map((c) => c.group_id)
+  )
+  const mojiZahtevi = new Set(
+    (mojaClanstva ?? []).filter((c) => c.status === 'na_cekanju').map((c) => c.group_id)
+  )
 
   let upit = supabase
     .from('groups')
@@ -93,7 +101,7 @@ export default async function GrupePage({
         <div>
           <h1 className="text-2xl font-semibold">Grupe za ucenje</h1>
           <p className="text-sm text-gray-600">
-            Vidis javne grupe i one cijim si clan.
+            Vidis sve grupe. Privatnoj se pridruzujes uz odobrenje vlasnika.
           </p>
         </div>
       </header>
@@ -181,6 +189,7 @@ export default async function GrupePage({
         <ul className="divide-y rounded-md border">
           {grupe.map((g) => {
             const clan = mojeGrupe.has(g.id)
+            const zahtevPoslat = mojiZahtevi.has(g.id)
             const puna = g.broj >= g.max_clanova
             const istaknuta = g.subject_id !== null && mojiPredmetiIds.has(g.subject_id)
 
@@ -211,6 +220,13 @@ export default async function GrupePage({
 
                 {clan ? (
                   <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-xs">clan</span>
+                ) : zahtevPoslat ? (
+                  <span className="shrink-0 text-xs text-gray-500">zahtev poslat</span>
+                ) : !g.is_public ? (
+                  <form action={pridruziSe} className="shrink-0">
+                    <input type="hidden" name="group_id" value={g.id} />
+                    <button className="rounded-md border px-3 py-1.5 text-sm">Zatrazi pristup</button>
+                  </form>
                 ) : puna ? (
                   <span className="shrink-0 text-xs text-gray-500">popunjena</span>
                 ) : (
