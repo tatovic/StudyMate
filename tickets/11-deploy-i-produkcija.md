@@ -7,12 +7,14 @@ pravom domenu.
 
 **Blokiran od:** 10.
 
-**Status:** u toku — kod i dokumentacija spremni, stvarni deploy radi korisnik ručno
+**Status:** neće se raditi — deploy nije u planu
 
-Sam deploy na Vercel i podešavanje Supabase produkcijskih vrednosti (Site URL,
-Redirect URLs, uključivanje Confirm email) zahtevaju pristup Vercel/Supabase nalogu i
-rade se ručno kroz njihove dashboard-e — uputstvo korak po korak je u `README.md`,
-sekcija "Deploy na Vercel". Ono što ne zavisi od naloga je završeno:
+Vercel deploy je odlučeno da se ne radi, pa kriterijumi vezani za javni URL i
+produkcijsku proveru na dva naloga ne mogu da se ispune i ostaju neštiklirani. Deo
+tiketa koji se odnosi na produkcijsku autentifikaciju je ipak završen — koristan je i
+nezavisan od toga da li aplikacija ikad ode na hosting. `README.md` (sekcija "Deploy
+na Vercel") i `db.md` (sekcija 6.1) ostaju kao referenca za slučaj da se odluka
+kasnije promeni.
 
 - registracija eksplicitno šalje `emailRedirectTo` sa domenom sa kog je zahtev stigao
   (`src/lib/site-url.ts`), pa link za potvrdu radi na bilo kom domenu bez ručnog
