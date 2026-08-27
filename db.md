@@ -324,13 +324,32 @@ Ovo se ne vidi u migracijama, ali je deo konfiguracije:
 
 | Podešavanje | Vrednost | Gde |
 |---|---|---|
-| Confirm email | **isključeno** za razvoj | Authentication → Sign In / Providers → Email |
+| Confirm email | **isključeno** za razvoj, **uključeno** za produkciju — vidi 6.1 | Authentication → Sign In / Providers → Email |
 | Realtime | uključen za `public.messages` | postavlja `002_rls.sql` |
 | Project URL | u `.env.local` kao `NEXT_PUBLIC_SUPABASE_URL` | Settings → API |
 | Anon/publishable ključ | u `.env.local` kao `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Settings → API |
 
 `NEXT_PUBLIC_SUPABASE_URL` mora biti oblika `https://<ref>.supabase.co`.
 Ubacivanje ključa u to polje je česta greška i ruši svaki poziv.
+
+### 6.1 Razvoj vs. produkcija — tiket 11
+
+Isti Supabase projekat se koristi i za razvoj i za produkciju (nema odvojenog
+projekta). Dve stvari se razlikuju između okruženja:
+
+| Podešavanje | Razvoj | Produkcija | Gde |
+|---|---|---|---|
+| Confirm email | isključeno — `signUp` odmah otvara sesiju | **uključeno** — korisnik mora da klikne link iz emaila pre nego što `signUp` otvori sesiju | Authentication → Sign In / Providers → Email |
+| Site URL | `http://localhost:3000` | javni URL aplikacije (npr. `https://studymate.vercel.app`) | Authentication → URL Configuration |
+| Redirect URLs | `http://localhost:3000/**` | `http://localhost:3000/**` **i** `https://<produkcijski-domen>/**` (oba ostaju dodata, razvoj i dalje mora da radi) | Authentication → URL Configuration |
+
+`Site URL` se koristi samo kao podrazumevani domen; aplikacija (`src/lib/site-url.ts`)
+eksplicitno šalje `emailRedirectTo` sa domenom sa kog je stigao zahtev za registraciju,
+pa link u emailu uvek vodi na pravo okruženje. `Redirect URLs` je ipak obavezan — Supabase
+odbija svaki `emailRedirectTo` koji nije na toj listi (dozvoljena wildcard šema `/**`).
+
+Kad se doda produkcijski domen, **ne brisati** `http://localhost:3000/**` sa liste —
+lokalni razvoj bi prestao da prima validne linkove za potvrdu.
 
 ---
 

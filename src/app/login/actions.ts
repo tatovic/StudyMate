@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { porukaGreske } from '@/lib/auth-greske'
 import { validirajLozinku } from '@/lib/validacija'
+import { trenutniOrigin } from '@/lib/site-url'
 
 export async function login(_prev: unknown, formData: FormData) {
   const supabase = await createClient()
@@ -27,14 +28,25 @@ export async function register(_prev: unknown, formData: FormData) {
   const lozinkaGreska = validirajLozinku(lozinka)
   if (lozinkaGreska) return { greska: lozinkaGreska }
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: String(formData.get('email')),
     password: lozinka,
-    options: { data: { ime: String(formData.get('ime')) } },
+    options: {
+      data: { ime: String(formData.get('ime')) },
+      emailRedirectTo: `${await trenutniOrigin()}/auth/confirm?next=/dashboard`,
+    },
   })
 
   if (error) {
     return { greska: porukaGreske(error, 'Registracija nije uspela. Pokusaj ponovo.') }
+  }
+
+  // Kad je "Confirm email" ukljucen (produkcija), signUp ne otvara sesiju odmah -
+  // korisnik mora prvo da klikne link iz emaila. Kad je iskljucen (razvoj), sesija
+  // postoji odmah i moze pravo na dashboard.
+  if (!data.session) {
+    revalidatePath('/', 'layout')
+    redirect('/login?poruka=proveri-email')
   }
 
   revalidatePath('/', 'layout')

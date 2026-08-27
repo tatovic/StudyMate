@@ -7,7 +7,22 @@ pravom domenu.
 
 **Blokiran od:** 10.
 
-**Status:** spremno
+**Status:** u toku — kod i dokumentacija spremni, stvarni deploy radi korisnik ručno
+
+Sam deploy na Vercel i podešavanje Supabase produkcijskih vrednosti (Site URL,
+Redirect URLs, uključivanje Confirm email) zahtevaju pristup Vercel/Supabase nalogu i
+rade se ručno kroz njihove dashboard-e — uputstvo korak po korak je u `README.md`,
+sekcija "Deploy na Vercel". Ono što ne zavisi od naloga je završeno:
+
+- registracija eksplicitno šalje `emailRedirectTo` sa domenom sa kog je zahtev stigao
+  (`src/lib/site-url.ts`), pa link za potvrdu radi na bilo kom domenu bez ručnog
+  podešavanja promenljive okruženja
+- kad je Confirm email uključeno, `signUp` više ne otvara sesiju odmah — korisnik se
+  preusmerava na `/login` sa jasnom porukom umesto na `/dashboard` bez sesije
+  (`ObavestenjeBaner`, `src/app/login/actions.ts`)
+- pokušaj prijave na nepotvrđen nalog već je imao jasnu poruku (`email_not_confirmed`
+  u `src/lib/auth-greske.ts`, iz tiketa o autentifikaciji)
+- istekao/nevažeći link za potvrdu prikazuje poruku na `/login` umesto tihog pada
 
 ## Kriterijumi prihvatanja
 
@@ -17,8 +32,8 @@ pravom domenu.
 - [ ] Link iz emaila vodi na produkcijski domen i uspešno potvrđuje nalog
 - [ ] Adrese za preusmeravanje posle prijave su podešene na produkcijski domen
 - [ ] Potvrđen korisnik završava prijavljen na početnoj strani aplikacije
-- [ ] Nepotvrđen korisnik dobija jasno objašnjenje šta treba da uradi
+- [x] Nepotvrđen korisnik dobija jasno objašnjenje šta treba da uradi
 - [ ] Ceo tok registracija → potvrda → izbor predmeta → kreiranje grupe → chat
       proveren na produkciji sa dva različita naloga
-- [ ] `README.md` sadrži javni URL i uputstvo za deploy
-- [ ] `db.md` sekcija o podešavanjima Supabase projekta razlikuje razvoj i produkciju
+- [x] `README.md` sadrži uputstvo za deploy (javni URL se upisuje posle prvog deploya)
+- [x] `db.md` sekcija o podešavanjima Supabase projekta razlikuje razvoj i produkciju
