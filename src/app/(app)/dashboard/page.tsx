@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Avatar } from '@/components/avatar'
+import { PraznoStanje } from '@/components/prazno-stanje'
 import { createClient } from '@/lib/supabase/server'
 import {
   rangirajSlicneKorisnike,
@@ -24,9 +25,13 @@ export default async function DashboardPage() {
     .eq('id', user!.id)
     .single()
 
-  const [{ data: slicniSirovi }, { data: grupeSirove }] = await Promise.all([
+  const [{ data: slicniSirovi }, { data: grupeSirove }, { count: brojPredmeta }] = await Promise.all([
     supabase.rpc('pronadji_slicne', { limit_n: 10 }),
     supabase.rpc('preporuci_grupe', { limit_n: 10 }),
+    supabase
+      .from('user_subjects')
+      .select('subject_id', { count: 'exact', head: true })
+      .eq('user_id', user!.id),
   ])
 
   // RPC vec vraca sortirano i ograniceno, ali redosled prikaza je poslovno pravilo
@@ -45,16 +50,20 @@ export default async function DashboardPage() {
         {profil?.skola && <p className="text-sm text-gray-600">{profil.skola}</p>}
       </header>
 
+      {!brojPredmeta && (
+        <PraznoStanje
+          naslov="Dobrodosao/la na StudyMate! Izaberi predmete koje ucis da bismo ti predlozili ljude i grupe za ucenje."
+          akcija={{ href: '/predmeti', label: 'Izaberi predmete' }}
+        />
+      )}
+
       <section className="space-y-3">
         <h2 className="text-lg font-medium">Slicni korisnici</h2>
         {!slicni?.length ? (
-          <p className="text-sm text-gray-600">
-            Jos nema predloga.{' '}
-            <Link href="/predmeti" className="underline">
-              Izaberi svoje predmete
-            </Link>{' '}
-            da bismo pronasli koga da ti predlozimo.
-          </p>
+          <PraznoStanje
+            naslov="Jos nema predloga. Izaberi svoje predmete da bismo pronasli koga da ti predlozimo."
+            akcija={{ href: '/predmeti', label: 'Izaberi predmete' }}
+          />
         ) : (
           <ul className="divide-y rounded-md border">
             {slicni!.map((k) => (
@@ -62,7 +71,7 @@ export default async function DashboardPage() {
                 <Link href={`/profil/${k.id}`} className="flex min-w-0 items-center gap-3">
                   <Avatar url={k.avatar_url} ime={k.ime} />
                   <div className="min-w-0">
-                    <p className="font-medium hover:underline">{k.ime}</p>
+                    <p className="truncate font-medium hover:underline">{k.ime}</p>
                     <p className="truncate text-sm text-gray-600">{k.predmeti.join(', ')}</p>
                     {k.skola && <p className="text-xs text-gray-500">{k.skola}</p>}
                   </div>
@@ -84,16 +93,19 @@ export default async function DashboardPage() {
           </Link>
         </div>
         {!grupe?.length ? (
-          <p className="text-sm text-gray-600">Trenutno nema otvorenih grupa za tvoje predmete.</p>
+          <PraznoStanje
+            naslov="Trenutno nema otvorenih grupa za tvoje predmete."
+            akcija={{ href: '/grupe', label: 'Napravi grupu' }}
+          />
         ) : (
           <ul className="divide-y rounded-md border">
             {grupe!.map((g) => (
               <li key={g.id} className="flex items-center justify-between gap-4 p-3">
                 <div className="min-w-0">
-                  <Link href={`/grupe/${g.id}`} className="font-medium hover:underline">
+                  <Link href={`/grupe/${g.id}`} className="block truncate font-medium hover:underline">
                     {g.naziv}
                   </Link>
-                  <p className="text-sm text-gray-600">{g.predmet}</p>
+                  <p className="truncate text-sm text-gray-600">{g.predmet}</p>
                 </div>
                 <span className="shrink-0 text-xs text-gray-600">
                   {g.broj_clanova}/{g.max_clanova}

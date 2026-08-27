@@ -1,7 +1,16 @@
+import { GreskaBaner } from '@/components/greska-baner'
+import { PraznoStanje } from '@/components/prazno-stanje'
+import { SubmitDugme } from '@/components/submit-dugme'
 import { createClient } from '@/lib/supabase/server'
 import { dodajPredmet, ukloniPredmet } from './actions'
 
-export default async function PredmetiPage() {
+// Next.js 16: searchParams je Promise i mora se await-ovati.
+export default async function PredmetiPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ akcija_greska?: string }>
+}) {
+  const sp = await searchParams
   const supabase = await createClient()
   const {
     data: { user },
@@ -32,6 +41,12 @@ export default async function PredmetiPage() {
         </p>
       </header>
 
+      {sp.akcija_greska === '1' && <GreskaBaner poruka="Radnja nije uspela. Pokusaj ponovo." />}
+
+      {poKategoriji.size === 0 && (
+        <PraznoStanje naslov="Trenutno nema dostupnih predmeta u katalogu." />
+      )}
+
       {[...poKategoriji.entries()].map(([kategorija, predmeti]) => (
         <section key={kategorija} className="space-y-2">
           <h2 className="text-sm font-medium uppercase tracking-wide text-gray-500">
@@ -41,8 +56,8 @@ export default async function PredmetiPage() {
             {predmeti!.map((p) => {
               const izabran = mojiIds.has(p.id)
               return (
-                <li key={p.id} className="flex items-center justify-between gap-4 p-3">
-                  <div>
+                <li key={p.id} className="flex flex-wrap items-center justify-between gap-4 p-3">
+                  <div className="min-w-0 break-words">
                     <p className="font-medium">{p.naziv}</p>
                     {izabran && (
                       <p className="text-xs text-gray-500">nivo: {nivoPo.get(p.id)}</p>
@@ -52,7 +67,7 @@ export default async function PredmetiPage() {
                   {izabran ? (
                     <form action={ukloniPredmet}>
                       <input type="hidden" name="subject_id" value={p.id} />
-                      <button className="rounded-md border px-3 py-1.5 text-sm">Ukloni</button>
+                      <SubmitDugme ucitavanjeTekst="Uklanjanje...">Ukloni</SubmitDugme>
                     </form>
                   ) : (
                     <form action={dodajPredmet} className="flex items-center gap-2">
@@ -62,9 +77,12 @@ export default async function PredmetiPage() {
                         <option value="srednji">srednji</option>
                         <option value="napredni">napredni</option>
                       </select>
-                      <button className="rounded-md bg-black px-3 py-1.5 text-sm text-white">
+                      <SubmitDugme
+                        ucitavanjeTekst="Dodavanje..."
+                        className="rounded-md bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50"
+                      >
                         Dodaj
-                      </button>
+                      </SubmitDugme>
                     </form>
                   )}
                 </li>

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { logout } from '@/app/login/actions'
+import { SubmitDugme } from '@/components/submit-dugme'
 
 const linkovi = [
   { href: '/dashboard', label: 'Pocetna' },
@@ -25,12 +26,12 @@ export default async function AppLayout({
   return (
     <div className="min-h-screen">
       <nav className="border-b">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 p-4">
-          <div className="flex items-center gap-4">
+        <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-x-4 gap-y-2 p-4">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <Link href="/dashboard" className="font-semibold">
               StudyMate
             </Link>
-            <div className="flex gap-3 text-sm text-gray-600">
+            <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-gray-600">
               {linkovi.map((l) => (
                 <Link key={l.href} href={l.href} className="hover:text-black">
                   {l.label}
@@ -39,7 +40,7 @@ export default async function AppLayout({
             </div>
           </div>
           <form action={logout}>
-            <button className="rounded-md border px-3 py-1.5 text-sm">Odjavi se</button>
+            <SubmitDugme ucitavanjeTekst="Odjavljivanje...">Odjavi se</SubmitDugme>
           </form>
         </div>
       </nav>

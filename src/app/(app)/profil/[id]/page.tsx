@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Avatar } from '@/components/avatar'
+import { PraznoStanje } from '@/components/prazno-stanje'
 import { createClient } from '@/lib/supabase/server'
 
 const NAZIVI_NIVOA: Record<string, string> = {
@@ -56,9 +57,9 @@ export default async function JavniProfilPage({
         &larr; Nazad
       </Link>
 
-      <header className="flex items-start gap-4">
+      <header className="flex flex-wrap items-start gap-4">
         <Avatar url={profil.avatar_url} ime={profil.ime} size={72} />
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 break-words">
           <h1 className="text-2xl font-semibold">{profil.ime}</h1>
           {profil.skola && <p className="text-sm text-gray-600">{profil.skola}</p>}
           {sopstveniProfil && (
@@ -77,7 +78,7 @@ export default async function JavniProfilPage({
       <section className="space-y-2">
         <h2 className="text-lg font-medium">Predmeti</h2>
         {predmeti.length === 0 ? (
-          <p className="text-sm text-gray-600">Korisnik jos nije izabrao predmete.</p>
+          <PraznoStanje naslov="Korisnik jos nije izabrao predmete." />
         ) : (
           <ul className="divide-y rounded-md border">
             {predmeti.map((p) => {
@@ -110,7 +111,7 @@ export default async function JavniProfilPage({
       <section className="space-y-2">
         <h2 className="text-lg font-medium">Javne grupe</h2>
         {!clanstvaSirova?.length ? (
-          <p className="text-sm text-gray-600">Korisnik nije clan nijedne javne grupe.</p>
+          <PraznoStanje naslov="Korisnik nije clan nijedne javne grupe." />
         ) : (
           <ul className="divide-y rounded-md border">
             {clanstvaSirova.map((c) => (

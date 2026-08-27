@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { porukaGreskeBaze } from '@/lib/db-greske'
 import { validirajSlikuProfila } from '@/lib/validacija'
 
 export async function sacuvajProfil(_prev: unknown, formData: FormData) {
@@ -23,7 +24,7 @@ export async function sacuvajProfil(_prev: unknown, formData: FormData) {
     })
     .eq('id', user.id)
 
-  if (error) return { greska: error.message }
+  if (error) return { greska: porukaGreskeBaze(error) }
 
   revalidatePath('/profil')
   revalidatePath('/dashboard')
@@ -80,7 +81,7 @@ export async function sacuvajAvatar(
     .update({ avatar_url: avatarUrl })
     .eq('id', user.id)
 
-  if (error) return { greska: error.message }
+  if (error) return { greska: porukaGreskeBaze(error) }
 
   revalidatePath('/profil')
   revalidatePath('/dashboard')

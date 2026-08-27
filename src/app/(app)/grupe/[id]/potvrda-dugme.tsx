@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, type ReactNode } from 'react'
+import { SubmitDugme } from '@/components/submit-dugme'
 
 // Deljeno dugme za destruktivne radnje (napusti grupu, ukloni clana, obrisi grupu) -
 // prvi klik samo otkriva potvrdu sa opisom posledica, drugi klik zaista salje formu.
@@ -50,9 +51,12 @@ export function PotvrdaDugme({
         >
           Otkazi
         </button>
-        <button className="rounded-md bg-red-600 px-3 py-1.5 text-sm text-white">
+        <SubmitDugme
+          ucitavanjeTekst="Slanje..."
+          className="rounded-md bg-red-600 px-3 py-1.5 text-sm text-white disabled:opacity-50"
+        >
           {potvrdaLabela}
-        </button>
+        </SubmitDugme>
       </div>
     </form>
   )

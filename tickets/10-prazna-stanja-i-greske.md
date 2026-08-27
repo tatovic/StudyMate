@@ -7,17 +7,17 @@ mogućnošću ponovnog pokušaja, umesto neuhvaćenog izuzetka. Sve radi i na te
 
 **Blokiran od:** 09.
 
-**Status:** spremno
+**Status:** zavrseno
 
 ## Kriterijumi prihvatanja
 
-- [ ] Svaka lista u aplikaciji ima prazno stanje sa jasnim sledećim korakom
-- [ ] Novoregistrovan korisnik je sa početne strane usmeren na izbor predmeta
-- [ ] Strane koje čekaju podatke prikazuju stanje učitavanja umesto praznog ekrana
-- [ ] Neuhvaćena greška prikazuje poruku na srpskom sa dugmetom za ponovni pokušaj
-- [ ] Nepostojeća putanja prikazuje stranu „nije pronađeno" u izgledu aplikacije
-- [ ] Svaka forma prikazuje stanje slanja i onemogućava dvostruko slanje
-- [ ] Greške iz baze se prikazuju kao razumljive poruke, ne kao sirovi tekst greške
-- [ ] Navigacija i sve strane su upotrebljive na širini mobilnog ekrana
-- [ ] Duga imena, opisi i nazivi grupa ne razbijaju raspored
-- [ ] Interaktivni elementi su dostupni tastaturom i imaju vidljiv fokus
+- [x] Svaka lista u aplikaciji ima prazno stanje sa jasnim sledećim korakom
+- [x] Novoregistrovan korisnik je sa početne strane usmeren na izbor predmeta
+- [x] Strane koje čekaju podatke prikazuju stanje učitavanja umesto praznog ekrana
+- [x] Neuhvaćena greška prikazuje poruku na srpskom sa dugmetom za ponovni pokušaj
+- [x] Nepostojeća putanja prikazuje stranu „nije pronađeno" u izgledu aplikacije
+- [x] Svaka forma prikazuje stanje slanja i onemogućava dvostruko slanje
+- [x] Greške iz baze se prikazuju kao razumljive poruke, ne kao sirovi tekst greške
+- [x] Navigacija i sve strane su upotrebljive na širini mobilnog ekrana
+- [x] Duga imena, opisi i nazivi grupa ne razbijaju raspored
+- [x] Interaktivni elementi su dostupni tastaturom i imaju vidljiv fokus

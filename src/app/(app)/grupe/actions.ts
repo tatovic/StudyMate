@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { porukaGreskeBaze } from '@/lib/db-greske'
 import { validirajNazivGrupe, validirajMaxClanova } from '@/lib/validacija'
 
 export async function napraviGrupu(_prev: unknown, formData: FormData) {
@@ -33,7 +34,7 @@ export async function napraviGrupu(_prev: unknown, formData: FormData) {
     .select('id')
     .single()
 
-  if (error) return { greska: error.message }
+  if (error) return { greska: porukaGreskeBaze(error) }
 
   // Vlasnik je automatski i clan
   await supabase.from('group_members').insert({
@@ -65,9 +66,9 @@ export async function pridruziSe(formData: FormData) {
 
   // Javnoj grupi se pridruzujes odmah; privatnoj samo saljes zahtev na cekanju
   // koji vlasnik odobrava ili odbija (tiket 08). Ako zahtev vec postoji,
-  // primarni kljuc (group_id, user_id) odbija insert - tiho se ignorise,
-  // isto kao i ostale greske u ovoj datoteci.
-  await supabase.from('group_members').insert({
+  // primarni kljuc (group_id, user_id) odbija insert (23505) - to se tiho
+  // ignorise jer znaci da je akcija vec izvrsena, ne da nesto nije u redu.
+  const { error } = await supabase.from('group_members').insert({
     group_id: groupId,
     user_id: user.id,
     uloga: 'clan',
@@ -77,6 +78,10 @@ export async function pridruziSe(formData: FormData) {
   revalidatePath('/grupe')
   revalidatePath(`/grupe/${groupId}`)
   revalidatePath('/dashboard')
+
+  if (error && error.code !== '23505') {
+    redirect(`/grupe/${groupId}?akcija_greska=1`)
+  }
 }
 
 export async function napustiGrupu(formData: FormData) {
@@ -88,7 +93,7 @@ export async function napustiGrupu(formData: FormData) {
 
   const groupId = Number(formData.get('group_id'))
 
-  await supabase
+  const { error } = await supabase
     .from('group_members')
     .delete()
     .eq('group_id', groupId)
@@ -96,6 +101,8 @@ export async function napustiGrupu(formData: FormData) {
 
   revalidatePath('/grupe')
   revalidatePath('/dashboard')
+
+  if (error) redirect(`/grupe/${groupId}?akcija_greska=1`)
   redirect('/grupe')
 }
 
@@ -165,10 +172,16 @@ export async function ukloniClana(formData: FormData) {
   // Vlasnik ne moze ukloniti sebe - vidi napomenu u db.md, sekcija 4.3.
   if (clanId === user.id) return
 
-  await supabase.from('group_members').delete().eq('group_id', groupId).eq('user_id', clanId)
+  const { error } = await supabase
+    .from('group_members')
+    .delete()
+    .eq('group_id', groupId)
+    .eq('user_id', clanId)
 
   revalidatePath(`/grupe/${groupId}`)
   revalidatePath('/grupe')
+
+  if (error) redirect(`/grupe/${groupId}?akcija_greska=1`)
 }
 
 export async function odobriZahtev(formData: FormData) {
@@ -203,7 +216,7 @@ export async function odobriZahtev(formData: FormData) {
     redirect(`/grupe/${groupId}?zahtev_greska=puna`)
   }
 
-  await supabase
+  const { error } = await supabase
     .from('group_members')
     .update({ status: 'aktivan' })
     .eq('group_id', groupId)
@@ -213,6 +226,8 @@ export async function odobriZahtev(formData: FormData) {
   revalidatePath(`/grupe/${groupId}`)
   revalidatePath('/grupe')
   revalidatePath('/dashboard')
+
+  if (error) redirect(`/grupe/${groupId}?akcija_greska=1`)
 }
 
 export async function odbijZahtev(formData: FormData) {
@@ -225,7 +240,7 @@ export async function odbijZahtev(formData: FormData) {
   const groupId = Number(formData.get('group_id'))
   const podnosilacId = String(formData.get('user_id'))
 
-  await supabase
+  const { error } = await supabase
     .from('group_members')
     .delete()
     .eq('group_id', groupId)
@@ -233,6 +248,8 @@ export async function odbijZahtev(formData: FormData) {
     .eq('status', 'na_cekanju')
 
   revalidatePath(`/grupe/${groupId}`)
+
+  if (error) redirect(`/grupe/${groupId}?akcija_greska=1`)
 }
 
 export async function obrisiGrupu(formData: FormData) {
@@ -245,9 +262,11 @@ export async function obrisiGrupu(formData: FormData) {
   const groupId = Number(formData.get('group_id'))
 
   // Clanstva i poruke se brisu automatski preko "on delete cascade" (001_schema.sql).
-  await supabase.from('groups').delete().eq('id', groupId).eq('owner_id', user.id)
+  const { error } = await supabase.from('groups').delete().eq('id', groupId).eq('owner_id', user.id)
 
   revalidatePath('/grupe')
   revalidatePath('/dashboard')
+
+  if (error) redirect(`/grupe/${groupId}?akcija_greska=1`)
   redirect('/grupe?obrisana=1')
 }

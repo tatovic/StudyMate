@@ -1,4 +1,7 @@
 import Link from 'next/link'
+import { GreskaBaner } from '@/components/greska-baner'
+import { PraznoStanje } from '@/components/prazno-stanje'
+import { SubmitDugme } from '@/components/submit-dugme'
 import { createClient } from '@/lib/supabase/server'
 import { NovaGrupa } from './nova-grupa'
 import { pridruziSe } from './actions'
@@ -9,6 +12,7 @@ type SearchParams = {
   moji?: string
   slobodne?: string
   obrisana?: string
+  akcija_greska?: string
 }
 
 function url(params: SearchParams) {
@@ -112,6 +116,8 @@ export default async function GrupePage({
         </p>
       )}
 
+      {sp.akcija_greska === '1' && <GreskaBaner poruka="Radnja nije uspela. Pokusaj ponovo." />}
+
       <NovaGrupa predmeti={predmeti ?? []} />
 
       <form method="get" className="flex flex-wrap items-end gap-3 rounded-md border p-4">
@@ -158,7 +164,12 @@ export default async function GrupePage({
           Samo slobodne (nepopunjene)
         </label>
 
-        <button className="rounded-md bg-black px-3 py-1.5 text-sm text-white">Pretrazi</button>
+        <SubmitDugme
+          ucitavanjeTekst="Pretraga..."
+          className="rounded-md bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50"
+        >
+          Pretrazi
+        </SubmitDugme>
       </form>
 
       {aktivniFilteri.length > 0 && (
@@ -180,11 +191,14 @@ export default async function GrupePage({
       )}
 
       {!grupe.length ? (
-        <p className="text-sm text-gray-600">
-          {filteriAktivni
-            ? 'Nema grupa koje odgovaraju pretrazi i izabranim filterima.'
-            : 'Jos nema grupa. Napravi prvu.'}
-        </p>
+        filteriAktivni ? (
+          <PraznoStanje
+            naslov="Nema grupa koje odgovaraju pretrazi i izabranim filterima."
+            akcija={{ href: '/grupe', label: 'Ocisti filtere' }}
+          />
+        ) : (
+          <PraznoStanje naslov="Jos nema grupa. Napravi prvu grupu za ucenje pomocu dugmeta iznad." />
+        )
       ) : (
         <ul className="divide-y rounded-md border">
           {grupe.map((g) => {
@@ -200,8 +214,8 @@ export default async function GrupePage({
                   istaknuta ? 'bg-amber-50' : ''
                 }`}
               >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
+                <div className="min-w-0 break-words">
+                  <div className="flex flex-wrap items-center gap-2">
                     <Link href={`/grupe/${g.id}`} className="font-medium hover:underline">
                       {g.naziv}
                     </Link>
@@ -225,14 +239,14 @@ export default async function GrupePage({
                 ) : !g.is_public ? (
                   <form action={pridruziSe} className="shrink-0">
                     <input type="hidden" name="group_id" value={g.id} />
-                    <button className="rounded-md border px-3 py-1.5 text-sm">Zatrazi pristup</button>
+                    <SubmitDugme ucitavanjeTekst="Slanje...">Zatrazi pristup</SubmitDugme>
                   </form>
                 ) : puna ? (
                   <span className="shrink-0 text-xs text-gray-500">popunjena</span>
                 ) : (
                   <form action={pridruziSe} className="shrink-0">
                     <input type="hidden" name="group_id" value={g.id} />
-                    <button className="rounded-md border px-3 py-1.5 text-sm">Pridruzi se</button>
+                    <SubmitDugme ucitavanjeTekst="Pridruzivanje...">Pridruzi se</SubmitDugme>
                   </form>
                 )}
               </li>

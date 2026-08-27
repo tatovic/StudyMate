@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { Avatar } from '@/components/avatar'
+import { PraznoStanje } from '@/components/prazno-stanje'
+import { SubmitDugme } from '@/components/submit-dugme'
 import { createClient } from '@/lib/supabase/server'
 import { rangirajSlicneKorisnike, type SlicanKorisnik } from '@/lib/rangiranje'
 
@@ -42,14 +44,10 @@ export default async function KorisniciPage({
     return (
       <main className="mx-auto max-w-3xl space-y-6 p-6">
         <h1 className="text-2xl font-semibold">Pretraga korisnika</h1>
-        <p className="text-sm text-gray-600">
-          Jos nisi izabrao nijedan predmet, pa ne mozemo prikazati koliko predmeta delis sa
-          drugima.{' '}
-          <Link href="/predmeti" className="underline">
-            Izaberi svoje predmete
-          </Link>{' '}
-          da bi pretraga imala smisla.
-        </p>
+        <PraznoStanje
+          naslov="Jos nisi izabrao nijedan predmet, pa ne mozemo prikazati koliko predmeta delis sa drugima."
+          akcija={{ href: '/predmeti', label: 'Izaberi svoje predmete' }}
+        />
       </main>
     )
   }
@@ -144,7 +142,12 @@ export default async function KorisniciPage({
           </select>
         </div>
 
-        <button className="rounded-md bg-black px-3 py-1.5 text-sm text-white">Pretrazi</button>
+        <SubmitDugme
+          ucitavanjeTekst="Pretraga..."
+          className="rounded-md bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50"
+        >
+          Pretrazi
+        </SubmitDugme>
       </form>
 
       {aktivniFilteri.length > 0 && (
@@ -166,9 +169,14 @@ export default async function KorisniciPage({
       )}
 
       {!rezultati?.length ? (
-        <p className="text-sm text-gray-600">
-          Nema korisnika koji odgovaraju pretrazi i izabranim filterima.
-        </p>
+        aktivniFilteri.length > 0 ? (
+          <PraznoStanje
+            naslov="Nema korisnika koji odgovaraju pretrazi i izabranim filterima."
+            akcija={{ href: '/korisnici', label: 'Ocisti filtere' }}
+          />
+        ) : (
+          <PraznoStanje naslov="Trenutno nema drugih korisnika za prikaz." />
+        )
       ) : (
         <ul className="divide-y rounded-md border">
           {rezultati.map((k) => (
@@ -176,7 +184,7 @@ export default async function KorisniciPage({
               <Link href={`/profil/${k.id}`} className="flex min-w-0 items-center gap-3">
                 <Avatar url={k.avatar_url} ime={k.ime} />
                 <div className="min-w-0">
-                  <p className="font-medium hover:underline">{k.ime}</p>
+                  <p className="truncate font-medium hover:underline">{k.ime}</p>
                   {k.predmeti.length > 0 && (
                     <p className="truncate text-sm text-gray-600">{k.predmeti.join(', ')}</p>
                   )}
