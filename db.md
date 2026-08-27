@@ -19,6 +19,7 @@ Pokreću se redom u Supabase Dashboard → SQL Editor.
 | 004 | `004_seed.sql` | Početni katalog predmeta |
 | 005 | `005_grants.sql` | Tabelarne privilegije za rolu `authenticated` |
 | 006 | `006_avatars.sql` | Storage bucket `avatars` i politike pristupa |
+| 007 | `007_avatars_rls_fix.sql` | Politike iz 006 promenjene na `to public` (pokusaj popravke, vidi sekciju 8 — jos ne radi) |
 
 Konvencija imenovanja za nove: `NNN_kratak_opis.sql`, sledeći slobodan broj.
 
@@ -289,18 +290,49 @@ uvek isto ime. Otpremanje nove slike koristi `upsert: true` i prepisuje stari fa
 istoj putanji, pa se stare slike ne gomilaju u skladištu. `avatar_url` u `profiles` je
 javni URL sa `?v=<timestamp>` dodatkom radi trenutnog osvežavanja prikaza posle zamene.
 
-**Politike nad `storage.objects`** (`to authenticated`, INSERT/UPDATE/DELETE):
-`bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text` — korisnik
-sme da menja isključivo fajlove u sopstvenom folderu (`<svoj_user_id>/...`), što znači da
-može postaviti sliku samo na svoj profil. Posebna SELECT politika nije potrebna jer je
-bucket javan.
+**Politike nad `storage.objects`** (`to public` posle `007_avatars_rls_fix.sql`,
+INSERT/UPDATE/DELETE): `bucket_id = 'avatars' and (storage.foldername(name))[1] =
+auth.uid()::text` — korisnik sme da menja isključivo fajlove u sopstvenom folderu
+(`<svoj_user_id>/...`), što znači da može postaviti sliku samo na svoj profil.
+`to public` umesto `to authenticated` je bio pokušaj popravke (vidi ⚠️ ispod) — sam
+uslov ostaje bezbedan jer je `auth.uid()` `NULL` za neprijavljen zahtev, pa provera
+nikad nije tačna za nekoga ko nije ulogovan. Posebna SELECT politika nije potrebna jer
+je bucket javan.
 
-**Tok postavljanja:** `avatar-upload.tsx` (Client Component) otprema fajl direktno u
-Storage preko browser klijenta (izuzetak od pravila "sve ide kroz Server Action", isti
-razlog kao kod chata — izbegava se dupli round-trip i limit veličine tela Server
-Action-a), a zatim poziva Server Action `sacuvajAvatar()` koji upisuje javni URL u
-`profiles.avatar_url`. Putanja `<user_id>/avatar` se u akciji gradi iz `getUser()`, nikad
-iz ulaza klijenta.
+**Tok postavljanja:** `avatar-upload.tsx` (Client Component) šalje fajl kroz Server
+Action `sacuvajAvatar()` (`profil/actions.ts`) koji otprema u Storage i upisuje javni URL
+u `profiles.avatar_url`. Putanja `<user_id>/avatar` se gradi iz `getUser()`, nikad iz
+ulaza klijenta. Zbog veličine slika (do 5MB) `bodySizeLimit` za Server Actions je podignut
+u `next.config.ts`.
+
+### ⚠️ Poznat problem — otpremanje trenutno ne radi (27.08.2026)
+
+Svaki pokušaj otpremanja pada sa `StorageApiError: new row violates row-level security
+policy` (status 400, `statusCode: '403'`), iako je sve provereno ispravno:
+
+- JWT je validan, `auth.uid()` se poklapa sa putanjom fajla (potvrđeno ispisom claim-ova
+  na serveru: `sub`, `role: authenticated`, `aud: authenticated` su tačni).
+- Identičan `insert into storage.objects (...)` **direktno u SQL Editoru**, sa
+  `set local role authenticated` i istim `request.jwt.claims`, **prolazi bez greške**
+  (i sa i bez eksplicitnog `owner`).
+- Ne postoje dodatni okidači (triggeri) koji bi mogli da smetaju — samo
+  `protect_objects_delete` i `update_objects_updated_at`, oba standardna i nepovezana.
+- Isprobano bez uspeha: otpremanje direktno iz browser klijenta; otpremanje kroz Server
+  Action (server-side klijent, ista sesija koja radi za sve ostale upite); restart
+  Supabase projekta; promena politika sa `to authenticated` na `to public`.
+
+Zaključak: problem je specifičan za Storage servis ovog projekta (razlikuje se od
+ponašanja PostgREST-a za iste kredencijale), verovatno na nivou kako Storage API
+prosleđuje JWT/rolu ka Postgres-u. Sledeći koraci kad se nastavi:
+
+1. Ukloniti `auth.uid()` proveru iz politike **privremeno** (samo `bucket_id = 'avatars'`)
+   da se potvrdi da je baš ta provera uzrok, ne nešto drugo (mime tip, `file_size_limit`
+   i sl.) — **vratiti punu proveru odmah posle testa**, ovo NIJE bezbedno stanje za trajno
+   ostavljanje.
+2. Ako se time potvrdi da je uzrok `auth.uid()`, proveriti Supabase Storage logove
+   (Dashboard → Logs → Storage Logs) za stvarnu grešku sa servera u trenutku zahteva.
+3. Ako ni to ne razjasni, kontaktirati Supabase support — moguće je da je u pitanju
+   projekat-specifična infrastrukturna greška koja se ne može rešiti iz aplikacije/SQL-a.
 
 ---
 

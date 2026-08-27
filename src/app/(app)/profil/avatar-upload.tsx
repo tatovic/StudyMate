@@ -1,76 +1,39 @@
 'use client'
 
-import { useState, type ChangeEvent } from 'react'
+import { useActionState, useRef } from 'react'
 import { Avatar } from '@/components/avatar'
-import { createClient } from '@/lib/supabase/client'
-import { DOZVOLJENI_TIPOVI_SLIKE, validirajSlikuProfila } from '@/lib/validacija'
+import { DOZVOLJENI_TIPOVI_SLIKE } from '@/lib/validacija'
 import { sacuvajAvatar } from './actions'
 
 export function AvatarUpload({
-  userId,
   ime,
   avatarUrl,
 }: {
-  userId: string
   ime: string
   avatarUrl: string | null
 }) {
-  const [url, setUrl] = useState(avatarUrl)
-  const [greska, setGreska] = useState<string | null>(null)
-  const [otprema, setOtprema] = useState(false)
+  const [state, formAction, pending] = useActionState(sacuvajAvatar, null)
+  const formRef = useRef<HTMLFormElement>(null)
 
-  async function izaberiSliku(e: ChangeEvent<HTMLInputElement>) {
-    const fajl = e.target.files?.[0]
-    e.target.value = ''
-    if (!fajl) return
-
-    const poruka = validirajSlikuProfila(fajl.type, fajl.size)
-    if (poruka) {
-      setGreska(poruka)
-      return
-    }
-
-    setGreska(null)
-    setOtprema(true)
-
-    const supabase = createClient()
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(`${userId}/avatar`, fajl, { upsert: true, contentType: fajl.type })
-
-    if (uploadError) {
-      setGreska('Slika nije mogla da se otpremi. Pokusaj ponovo.')
-      setOtprema(false)
-      return
-    }
-
-    const rezultat = await sacuvajAvatar()
-    setOtprema(false)
-
-    if ('greska' in rezultat) {
-      setGreska(rezultat.greska)
-      return
-    }
-
-    setUrl(rezultat.avatarUrl)
-  }
+  const prikazanaSlika = state && 'avatarUrl' in state ? state.avatarUrl : avatarUrl
 
   return (
-    <div className="flex items-center gap-4">
-      <Avatar url={url} ime={ime} size={72} />
+    <form ref={formRef} action={formAction} className="flex items-center gap-4">
+      <Avatar url={prikazanaSlika} ime={ime} size={72} />
       <div className="flex flex-col gap-1">
         <label className="w-fit cursor-pointer rounded-md border px-3 py-1.5 text-sm">
-          {otprema ? 'Otpremanje...' : 'Promeni sliku'}
+          {pending ? 'Otpremanje...' : 'Promeni sliku'}
           <input
             type="file"
+            name="slika"
             accept={DOZVOLJENI_TIPOVI_SLIKE.join(',')}
             className="hidden"
-            disabled={otprema}
-            onChange={izaberiSliku}
+            disabled={pending}
+            onChange={() => formRef.current?.requestSubmit()}
           />
         </label>
-        {greska && <p className="text-sm text-red-600">{greska}</p>}
+        {state && 'greska' in state && <p className="text-sm text-red-600">{state.greska}</p>}
       </div>
-    </div>
+    </form>
   )
 }

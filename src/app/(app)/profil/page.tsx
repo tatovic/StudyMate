@@ -21,11 +21,7 @@ export default async function ProfilPage() {
         <p className="text-sm text-gray-600">{user!.email}</p>
       </header>
 
-      <AvatarUpload
-        userId={user!.id}
-        ime={profil?.ime ?? ''}
-        avatarUrl={profil?.avatar_url ?? null}
-      />
+      <AvatarUpload ime={profil?.ime ?? ''} avatarUrl={profil?.avatar_url ?? null} />
 
       <ProfilForm profil={profil ?? { ime: '', skola: null, opis: null }} />
     </main>
