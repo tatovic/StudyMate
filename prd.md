@@ -132,6 +132,8 @@ Implementirano i radi:
 - Početna strana sa preporukama korisnika i grupa (RPC pozivi)
 - Izbor predmeta sa nivoom znanja
 - Izmena profila (ime, škola, opis)
+- Javni profil drugog korisnika (predmeti, javne grupe), sa linkom iz liste sličnih
+  korisnika i liste članova grupe
 - Lista grupa, kreiranje grupe, pridruživanje, napuštanje
 - Strana grupe sa listom članova i chatom
 - Baza: 5 migracija, RLS na svim tabelama, 2 RPC funkcije
@@ -163,7 +165,7 @@ odgovarajućem fajlu iz `tickets/` u `zavrseno`.
 - [x] **01.5** — [Osnovni testovi](./tickets/01.5-osnovni-testovi.md)
 - [x] **02** — [Generisani tipovi baze umesto ručnih override-a](./tickets/02-generisani-tipovi-baze.md)
 - [ ] **03** — [Slika profila: upload, prikaz i zamena](./tickets/03-slika-profila.md)
-- [ ] **04** — [Javni profil drugog korisnika](./tickets/04-javni-profil-korisnika.md)
+- [x] **04** — [Javni profil drugog korisnika](./tickets/04-javni-profil-korisnika.md)
 - [ ] **05** — [Pretraga i filtriranje korisnika](./tickets/05-pretraga-korisnika.md)
 - [ ] **06** — [Pretraga i filtriranje grupa](./tickets/06-pretraga-grupa.md)
 - [ ] **07** — [Upravljanje grupom za vlasnika](./tickets/07-upravljanje-grupom.md)

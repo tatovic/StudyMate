@@ -98,15 +98,15 @@ export default async function GrupaPage({
         <ul className="divide-y rounded-md border">
           {(clanovi ?? []).map((c) => (
             <li key={c.user_id} className="flex items-center justify-between p-3">
-              <div className="flex items-center gap-3">
+              <Link href={`/profil/${c.user_id}`} className="flex items-center gap-3">
                 <Avatar url={c.profiles?.avatar_url ?? null} ime={c.profiles?.ime ?? 'Nepoznat'} size={36} />
                 <div>
-                  <p className="font-medium">{c.profiles?.ime}</p>
+                  <p className="font-medium hover:underline">{c.profiles?.ime}</p>
                   {c.profiles?.skola && (
                     <p className="text-xs text-gray-500">{c.profiles.skola}</p>
                   )}
                 </div>
-              </div>
+              </Link>
               {c.uloga === 'vlasnik' && (
                 <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs">vlasnik</span>
               )}

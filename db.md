@@ -20,6 +20,7 @@ Pokreću se redom u Supabase Dashboard → SQL Editor.
 | 005 | `005_grants.sql` | Tabelarne privilegije za rolu `authenticated` |
 | 006 | `006_avatars.sql` | Storage bucket `avatars` i politike pristupa |
 | 007 | `007_avatars_rls_fix.sql` | Politike iz 006 promenjene na `to public` (pokusaj popravke, vidi sekciju 8 — jos ne radi) |
+| 008 | `008_javni_profil.sql` | Dodatna RLS politika: clanstva u javnim grupama vidljiva svim prijavljenima (za javni profil, tiket 04) |
 
 Konvencija imenovanja za nove: `NNN_kratak_opis.sql`, sledeći slobodan broj.
 
@@ -183,7 +184,7 @@ Ovo je standardni Supabase obrazac.
 | `subjects` | svi prijavljeni | — | — | — |
 | `user_subjects` | svi prijavljeni | samo sebi | — | samo sebi |
 | `groups` | javne + svoje + gde si član | kao vlasnik | samo vlasnik | samo vlasnik |
-| `group_members` | svoja članstva + članstva svojih grupa | samo sebe | — | samo sebe |
+| `group_members` | svoja članstva + članstva svojih grupa + članstva javnih grupa (od 008, za javni profil) | samo sebe | — | samo sebe |
 | `messages` | samo u svojim grupama | samo u svojim grupama, kao ti | — | samo svoje |
 
 Sve politike su `TO authenticated`. Neprijavljen korisnik ne vidi ništa.
@@ -195,10 +196,14 @@ Sve politike su `TO authenticated`. Neprijavljen korisnik ne vidi ništa.
 - Učitavanje poruka ima smisla samo ako je korisnik član; u suprotnom RLS vrati prazan niz.
 - `profiles` je vidljiv svim prijavljenima jer je to javni profil. Email **nije** u
   `profiles` i ne izlaže se drugima.
-- **Agregati nad `group_members` su tačni samo članovima.** Politika dozvoljava čitanje
-  sopstvenih članstava i članstava svojih grupa, pa `count(*)` nad tuđom grupom vraća 0,
-  a ne stvarni broj članova. Isto važi za `preporuci_grupe`, koja je `security invoker`.
-  Nedostatak N-2 u `prd.md`; rešava se u tiketu 06.
+- **Agregati nad `group_members` su tačni samo članovima grupe, sem za javne grupe
+  (od migracije 008).** Za privatnu grupu čiji nisi član, `count(*)` vraća 0, a ne
+  stvarni broj članova, jer politika dozvoljava čitanje samo sopstvenih članstava i
+  članstava svojih grupa. Za javnu grupu su članstva vidljiva svima (dodato u tiketu 04
+  radi prikaza javnih grupa na javnom profilu), pa je `count(*)` tačan bez obzira na
+  članstvo posmatrača. `preporuci_grupe` je i dalje `security invoker` i ne koristi ovu
+  politiku direktno. Nedostatak N-2 u `prd.md` ostaje za privatne grupe i za UI koji
+  broj članova još ne prikazuje na osnovu ovoga; rešava se u tiketu 06.
 
 ---
 

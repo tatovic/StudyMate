@@ -13,6 +13,7 @@ describe('Pravila pristupa (RLS)', () => {
   let vlasnik: TestKorisnik
   let gost: TestKorisnik
   let groupId: number
+  let privatnaGroupId: number
 
   beforeAll(async () => {
     vlasnik = await registrujTestKorisnika('vlasnik')
@@ -40,6 +41,24 @@ describe('Pravila pristupa (RLS)', () => {
     await vlasnik.supabase
       .from('messages')
       .insert({ group_id: groupId, user_id: vlasnik.userId, tekst: 'tajna poruka clanova' })
+
+    const { data: privatnaGrupa, error: privatnaGreska } = await vlasnik.supabase
+      .from('groups')
+      .insert({
+        naziv: '[TEST RLS] privatna grupa',
+        subject_id: predmet.id,
+        owner_id: vlasnik.userId,
+        is_public: false,
+      })
+      .select('id')
+      .single()
+    if (privatnaGreska || !privatnaGrupa)
+      throw new Error(`Kreiranje privatne test grupe nije uspelo: ${privatnaGreska?.message}`)
+    privatnaGroupId = privatnaGrupa.id
+
+    await vlasnik.supabase
+      .from('group_members')
+      .insert({ group_id: privatnaGroupId, user_id: vlasnik.userId, uloga: 'vlasnik', status: 'aktivan' })
   })
 
   afterAll(async () => {
@@ -87,6 +106,26 @@ describe('Pravila pristupa (RLS)', () => {
 
     const { data: grupa } = await vlasnik.supabase.from('groups').select('id').eq('id', groupId).maybeSingle()
     expect(grupa?.id).toBe(groupId)
+  })
+
+  it('nečlan vidi clanstva javne grupe (za javni profil, tiket 04)', async () => {
+    const { data, error } = await gost.supabase
+      .from('group_members')
+      .select('user_id')
+      .eq('group_id', groupId)
+      .eq('user_id', vlasnik.userId)
+    expect(error).toBeNull()
+    expect(data).toEqual([{ user_id: vlasnik.userId }])
+  })
+
+  it('nečlan ne vidi clanstva privatne grupe', async () => {
+    const { data, error } = await gost.supabase
+      .from('group_members')
+      .select('user_id')
+      .eq('group_id', privatnaGroupId)
+      .eq('user_id', vlasnik.userId)
+    expect(error).toBeNull()
+    expect(data).toEqual([])
   })
 
   it('neprijavljen posetilac ne dobija nijedan red iz baze', async () => {

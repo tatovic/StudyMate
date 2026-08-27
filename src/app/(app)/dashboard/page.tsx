@@ -59,14 +59,14 @@ export default async function DashboardPage() {
           <ul className="divide-y rounded-md border">
             {slicni!.map((k) => (
               <li key={k.id} className="flex items-center justify-between gap-4 p-3">
-                <div className="flex min-w-0 items-center gap-3">
+                <Link href={`/profil/${k.id}`} className="flex min-w-0 items-center gap-3">
                   <Avatar url={k.avatar_url} ime={k.ime} />
                   <div className="min-w-0">
-                    <p className="font-medium">{k.ime}</p>
+                    <p className="font-medium hover:underline">{k.ime}</p>
                     <p className="truncate text-sm text-gray-600">{k.predmeti.join(', ')}</p>
                     {k.skola && <p className="text-xs text-gray-500">{k.skola}</p>}
                   </div>
-                </div>
+                </Link>
                 <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-xs">
                   {k.zajednicki} zajednickih
                 </span>
