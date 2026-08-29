@@ -21,20 +21,22 @@ export default async function LoginPage({
   const sp = await searchParams
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 p-6">
-      <h1 className="text-2xl font-semibold">Prijava na StudyMate</h1>
+    <main className="flex min-h-screen flex-col justify-center bg-gradient-to-b from-indigo-50 via-white to-white p-6">
+      <div className="mx-auto w-full max-w-sm space-y-6 rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+        <h1 className="text-2xl font-semibold tracking-tight">Prijava na StudyMate</h1>
 
-      {sp.greska && GRESKE[sp.greska] && <GreskaBaner poruka={GRESKE[sp.greska]} />}
-      {sp.poruka && OBAVESTENJA[sp.poruka] && <ObavestenjeBaner poruka={OBAVESTENJA[sp.poruka]} />}
+        {sp.greska && GRESKE[sp.greska] && <GreskaBaner poruka={GRESKE[sp.greska]} />}
+        {sp.poruka && OBAVESTENJA[sp.poruka] && <ObavestenjeBaner poruka={OBAVESTENJA[sp.poruka]} />}
 
-      <LoginForm />
+        <LoginForm />
 
-      <p className="text-sm text-gray-600">
-        Nemas nalog?{' '}
-        <Link href="/register" className="underline">
-          Registruj se
-        </Link>
-      </p>
+        <p className="text-sm text-gray-600">
+          Nemas nalog?{' '}
+          <Link href="/register" className="font-medium text-indigo-600 hover:underline">
+            Registruj se
+          </Link>
+        </p>
+      </div>
     </main>
   )
 }

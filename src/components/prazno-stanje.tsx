@@ -10,12 +10,12 @@ export function PraznoStanje({
   akcija?: { href: string; label: string }
 }) {
   return (
-    <div className="rounded-md border border-dashed p-6 text-center">
+    <div className="rounded-xl border border-dashed border-gray-300 bg-white/60 p-8 text-center">
       <p className="text-sm text-gray-600">{naslov}</p>
       {akcija && (
         <Link
           href={akcija.href}
-          className="mt-3 inline-block rounded-md bg-black px-3 py-1.5 text-sm text-white"
+          className="mt-4 inline-block rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700"
         >
           {akcija.label}
         </Link>

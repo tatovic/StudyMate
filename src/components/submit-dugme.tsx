@@ -10,7 +10,7 @@ import { useFormStatus } from 'react-dom'
 export function SubmitDugme({
   children,
   ucitavanjeTekst,
-  className = 'rounded-md border px-3 py-1.5 text-sm disabled:opacity-50',
+  className = 'rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50',
 }: {
   children: ReactNode
   ucitavanjeTekst: string

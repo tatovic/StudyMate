@@ -13,7 +13,7 @@ export function LoginForm() {
         type="email"
         required
         placeholder="Email"
-        className="rounded-md border px-3 py-2"
+        className="rounded-lg border border-gray-300 px-3 py-2 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
       />
       <input
         name="password"
@@ -21,7 +21,7 @@ export function LoginForm() {
         required
         minLength={6}
         placeholder="Lozinka"
-        className="rounded-md border px-3 py-2"
+        className="rounded-lg border border-gray-300 px-3 py-2 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
       />
 
       {state?.greska && <p className="text-sm text-red-600">{state.greska}</p>}
@@ -29,7 +29,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-md bg-black px-3 py-2 text-white disabled:opacity-50"
+        className="rounded-lg bg-indigo-600 px-3 py-2 font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {pending ? 'Prijavljivanje...' : 'Prijavi se'}
       </button>

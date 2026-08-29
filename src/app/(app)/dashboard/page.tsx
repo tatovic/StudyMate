@@ -46,7 +46,7 @@ export default async function DashboardPage() {
   return (
     <main className="mx-auto max-w-3xl space-y-8 p-6">
       <header>
-        <h1 className="text-2xl font-semibold">Zdravo, {profil?.ime ?? 'korisnice'}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Zdravo, {profil?.ime ?? 'korisnice'}</h1>
         {profil?.skola && <p className="text-sm text-gray-600">{profil.skola}</p>}
       </header>
 
@@ -58,16 +58,16 @@ export default async function DashboardPage() {
       )}
 
       <section className="space-y-3">
-        <h2 className="text-lg font-medium">Slicni korisnici</h2>
+        <h2 className="text-lg font-medium tracking-tight">Slicni korisnici</h2>
         {!slicni?.length ? (
           <PraznoStanje
             naslov="Jos nema predloga. Izaberi svoje predmete da bismo pronasli koga da ti predlozimo."
             akcija={{ href: '/predmeti', label: 'Izaberi predmete' }}
           />
         ) : (
-          <ul className="divide-y rounded-md border">
+          <ul className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-sm">
             {slicni!.map((k) => (
-              <li key={k.id} className="flex items-center justify-between gap-4 p-3">
+              <li key={k.id} className="flex items-center justify-between gap-4 p-3 transition-colors hover:bg-gray-50">
                 <Link href={`/profil/${k.id}`} className="flex min-w-0 items-center gap-3">
                   <Avatar url={k.avatar_url} ime={k.ime} />
                   <div className="min-w-0">
@@ -76,7 +76,7 @@ export default async function DashboardPage() {
                     {k.skola && <p className="text-xs text-gray-500">{k.skola}</p>}
                   </div>
                 </Link>
-                <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-xs">
+                <span className="shrink-0 rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700">
                   {k.zajednicki} zajednickih
                 </span>
               </li>
@@ -87,8 +87,8 @@ export default async function DashboardPage() {
 
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-medium">Preporucene grupe</h2>
-          <Link href="/grupe" className="text-sm underline">
+          <h2 className="text-lg font-medium tracking-tight">Preporucene grupe</h2>
+          <Link href="/grupe" className="text-sm font-medium text-indigo-600 hover:underline">
             Sve grupe
           </Link>
         </div>
@@ -98,9 +98,9 @@ export default async function DashboardPage() {
             akcija={{ href: '/grupe', label: 'Napravi grupu' }}
           />
         ) : (
-          <ul className="divide-y rounded-md border">
+          <ul className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-sm">
             {grupe!.map((g) => (
-              <li key={g.id} className="flex items-center justify-between gap-4 p-3">
+              <li key={g.id} className="flex items-center justify-between gap-4 p-3 transition-colors hover:bg-gray-50">
                 <div className="min-w-0">
                   <Link href={`/grupe/${g.id}`} className="block truncate font-medium hover:underline">
                     {g.naziv}

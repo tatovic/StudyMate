@@ -17,7 +17,7 @@ export default async function ProfilPage() {
   return (
     <main className="mx-auto max-w-xl space-y-6 p-6">
       <header>
-        <h1 className="text-2xl font-semibold">Moj profil</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Moj profil</h1>
         <p className="text-sm text-gray-600">{user!.email}</p>
       </header>
 

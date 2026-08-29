@@ -127,7 +127,7 @@ export default async function GrupaPage({
 
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 break-words">
-          <h1 className="text-2xl font-semibold">{grupa.naziv}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{grupa.naziv}</h1>
           <p className="text-sm text-gray-600">
             {grupa.subjects?.naziv ?? 'bez predmeta'} · {clanovi?.length ?? 0}/{grupa.max_clanova}{' '}
             clanova{!grupa.is_public && ' · privatna'}
@@ -154,7 +154,7 @@ export default async function GrupaPage({
               <input type="hidden" name="group_id" value={grupa.id} />
               <SubmitDugme
                 ucitavanjeTekst="Slanje..."
-                className="shrink-0 rounded-md bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50"
+                className="shrink-0 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Zatrazi pristup
               </SubmitDugme>
@@ -166,7 +166,7 @@ export default async function GrupaPage({
               <input type="hidden" name="group_id" value={grupa.id} />
               <SubmitDugme
                 ucitavanjeTekst="Pridruzivanje..."
-                className="shrink-0 rounded-md bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50"
+                className="shrink-0 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Pridruzi se
               </SubmitDugme>
@@ -175,7 +175,7 @@ export default async function GrupaPage({
       </header>
 
       {sp.zahtev_greska === 'puna' && (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">
+        <p className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-800">
           Zahtev nije odobren - grupa je vec popunjena. Povecaj maksimalan broj clanova ili
           ukloni nekog clana da bi napravio mesta.
         </p>
@@ -184,7 +184,7 @@ export default async function GrupaPage({
       {sp.akcija_greska === '1' && <GreskaBaner poruka="Radnja nije uspela. Pokusaj ponovo." />}
 
       {jeVlasnik && (
-        <section className="flex flex-wrap items-start justify-between gap-4 rounded-md border p-4">
+        <section className="flex flex-wrap items-start justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
           <div>
             <h2 className="text-sm font-medium text-gray-700">Upravljanje grupom</h2>
             <p className="text-xs text-gray-500">Vidljivo samo tebi, kao vlasniku grupe.</p>
@@ -216,13 +216,13 @@ export default async function GrupaPage({
 
       {jeVlasnik && !grupa.is_public && (
         <section className="space-y-2">
-          <h2 className="text-lg font-medium">Zahtevi za clanstvo</h2>
+          <h2 className="text-lg font-medium tracking-tight">Zahtevi za clanstvo</h2>
           {!zahtevi?.length ? (
             <PraznoStanje naslov="Trenutno nema zahteva na cekanju." />
           ) : (
-            <ul className="divide-y rounded-md border">
+            <ul className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-sm">
               {zahtevi.map((z) => (
-                <li key={z.user_id} className="flex items-center justify-between gap-4 p-3">
+                <li key={z.user_id} className="flex items-center justify-between gap-4 p-3 transition-colors hover:bg-gray-50">
                   <Link href={`/profil/${z.user_id}`} className="flex min-w-0 items-center gap-3">
                     <Avatar
                       url={z.profiles?.avatar_url ?? null}
@@ -247,7 +247,7 @@ export default async function GrupaPage({
                       <input type="hidden" name="user_id" value={z.user_id} />
                       <SubmitDugme
                         ucitavanjeTekst="Prihvatanje..."
-                        className="rounded-md bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50"
+                        className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Prihvati
                       </SubmitDugme>
@@ -257,7 +257,7 @@ export default async function GrupaPage({
                       <input type="hidden" name="user_id" value={z.user_id} />
                       <SubmitDugme
                         ucitavanjeTekst="Odbijanje..."
-                        className="rounded-md border border-red-300 px-3 py-1.5 text-sm text-red-700 disabled:opacity-50"
+                        className="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-sm font-medium text-red-700 shadow-sm transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Odbij
                       </SubmitDugme>
@@ -271,13 +271,13 @@ export default async function GrupaPage({
       )}
 
       <section className="space-y-2">
-        <h2 className="text-lg font-medium">Clanovi</h2>
+        <h2 className="text-lg font-medium tracking-tight">Clanovi</h2>
         {!clanovi?.length ? (
           <PraznoStanje naslov="Ova grupa trenutno nema clanova." />
         ) : (
-        <ul className="divide-y rounded-md border">
+        <ul className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-sm">
           {clanovi.map((c) => (
-            <li key={c.user_id} className="flex items-center justify-between gap-3 p-3">
+            <li key={c.user_id} className="flex items-center justify-between gap-3 p-3 transition-colors hover:bg-gray-50">
               <Link href={`/profil/${c.user_id}`} className="flex min-w-0 items-center gap-3">
                 <Avatar url={c.profiles?.avatar_url ?? null} ime={c.profiles?.ime ?? 'Nepoznat'} size={36} />
                 <div className="min-w-0">
@@ -288,7 +288,7 @@ export default async function GrupaPage({
                 </div>
               </Link>
               {c.uloga === 'vlasnik' ? (
-                <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs">vlasnik</span>
+                <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600">vlasnik</span>
               ) : (
                 jeVlasnik && (
                   <PotvrdaDugme
@@ -310,7 +310,7 @@ export default async function GrupaPage({
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-lg font-medium">Chat</h2>
+        <h2 className="text-lg font-medium tracking-tight">Chat</h2>
         {jeClan ? (
           <Chat
             groupId={grupa.id}

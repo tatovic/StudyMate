@@ -60,12 +60,12 @@ export default async function JavniProfilPage({
       <header className="flex flex-wrap items-start gap-4">
         <Avatar url={profil.avatar_url} ime={profil.ime} size={72} />
         <div className="min-w-0 flex-1 break-words">
-          <h1 className="text-2xl font-semibold">{profil.ime}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{profil.ime}</h1>
           {profil.skola && <p className="text-sm text-gray-600">{profil.skola}</p>}
           {sopstveniProfil && (
             <Link
               href="/profil"
-              className="mt-2 inline-block rounded-md border px-3 py-1.5 text-sm hover:bg-gray-50"
+              className="mt-2 inline-block rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
             >
               Izmeni profil
             </Link>
@@ -76,24 +76,24 @@ export default async function JavniProfilPage({
       {profil.opis && <p className="text-sm text-gray-700">{profil.opis}</p>}
 
       <section className="space-y-2">
-        <h2 className="text-lg font-medium">Predmeti</h2>
+        <h2 className="text-lg font-medium tracking-tight">Predmeti</h2>
         {predmeti.length === 0 ? (
           <PraznoStanje naslov="Korisnik jos nije izabrao predmete." />
         ) : (
-          <ul className="divide-y rounded-md border">
+          <ul className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-sm">
             {predmeti.map((p) => {
               const zajednicki = !sopstveniProfil && mojiPredmetiIds.has(p.subjects!.id)
               return (
                 <li
                   key={p.subjects!.id}
                   className={`flex items-center justify-between gap-4 p-3 ${
-                    zajednicki ? 'bg-gray-50' : ''
+                    zajednicki ? 'bg-indigo-50/50' : ''
                   }`}
                 >
                   <span className="font-medium">{p.subjects!.naziv}</span>
                   <span className="flex shrink-0 items-center gap-2">
                     {zajednicki && (
-                      <span className="rounded-full bg-black px-2.5 py-1 text-xs text-white">
+                      <span className="rounded-full bg-indigo-600 px-2.5 py-1 text-xs font-medium text-white">
                         zajednicki
                       </span>
                     )}
@@ -109,13 +109,13 @@ export default async function JavniProfilPage({
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-lg font-medium">Javne grupe</h2>
+        <h2 className="text-lg font-medium tracking-tight">Javne grupe</h2>
         {!clanstvaSirova?.length ? (
           <PraznoStanje naslov="Korisnik nije clan nijedne javne grupe." />
         ) : (
-          <ul className="divide-y rounded-md border">
+          <ul className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-sm">
             {clanstvaSirova.map((c) => (
-              <li key={c.groups.id} className="p-3">
+              <li key={c.groups.id} className="p-3 transition-colors hover:bg-gray-50">
                 <Link href={`/grupe/${c.groups.id}`} className="font-medium hover:underline">
                   {c.groups.naziv}
                 </Link>

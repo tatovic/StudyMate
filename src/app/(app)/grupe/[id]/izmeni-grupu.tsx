@@ -23,7 +23,7 @@ export function IzmeniGrupu({ grupa, predmeti }: { grupa: Grupa; predmeti: Predm
       <button
         type="button"
         onClick={() => setOtvoren(true)}
-        className="shrink-0 rounded-md border px-3 py-1.5 text-sm"
+        className="shrink-0 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
       >
         Izmeni grupu
       </button>
@@ -31,7 +31,7 @@ export function IzmeniGrupu({ grupa, predmeti }: { grupa: Grupa; predmeti: Predm
   }
 
   return (
-    <form action={formAction} className="flex flex-col gap-3 rounded-md border p-4">
+    <form action={formAction} className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
       <input type="hidden" name="group_id" value={grupa.id} />
 
       <input
@@ -39,14 +39,14 @@ export function IzmeniGrupu({ grupa, predmeti }: { grupa: Grupa; predmeti: Predm
         required
         defaultValue={grupa.naziv}
         placeholder="Naziv grupe"
-        className="rounded-md border px-3 py-2"
+        className="rounded-lg border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
       />
 
       <select
         name="subject_id"
         required
         defaultValue={grupa.subject_id ?? ''}
-        className="rounded-md border px-3 py-2"
+        className="rounded-lg border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
       >
         <option value="" disabled>
           Izaberi predmet
@@ -63,7 +63,7 @@ export function IzmeniGrupu({ grupa, predmeti }: { grupa: Grupa; predmeti: Predm
         rows={3}
         defaultValue={grupa.opis ?? ''}
         placeholder="Opis grupe - sta ucite, kada se nalazite..."
-        className="rounded-md border px-3 py-2"
+        className="rounded-lg border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
       />
 
       <label className="flex items-center gap-2 text-sm">
@@ -74,12 +74,12 @@ export function IzmeniGrupu({ grupa, predmeti }: { grupa: Grupa; predmeti: Predm
           min={2}
           max={100}
           defaultValue={grupa.max_clanova}
-          className="w-20 rounded-md border px-2 py-1"
+          className="w-20 rounded-lg border border-gray-300 px-2 py-1 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
         />
       </label>
 
       <label className="flex items-center gap-2 text-sm">
-        <input name="is_public" type="checkbox" defaultChecked={grupa.is_public} />
+        <input name="is_public" type="checkbox" defaultChecked={grupa.is_public} className="accent-indigo-600" />
         Javna grupa (vidljiva svima)
       </label>
 
@@ -89,14 +89,14 @@ export function IzmeniGrupu({ grupa, predmeti }: { grupa: Grupa; predmeti: Predm
       <div className="flex gap-2">
         <button
           disabled={pending}
-          className="rounded-md bg-black px-4 py-2 text-sm text-white disabled:opacity-50"
+          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending ? 'Cuvanje...' : 'Sacuvaj izmene'}
         </button>
         <button
           type="button"
           onClick={() => setOtvoren(false)}
-          className="rounded-md border px-4 py-2 text-sm"
+          className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
         >
           Otkazi
         </button>

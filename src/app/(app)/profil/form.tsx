@@ -16,7 +16,7 @@ export function ProfilForm({ profil }: { profil: Profil }) {
           name="ime"
           required
           defaultValue={profil.ime}
-          className="rounded-md border px-3 py-2 text-base"
+          className="rounded-lg border border-gray-300 px-3 py-2 text-base shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
         />
       </label>
 
@@ -25,7 +25,7 @@ export function ProfilForm({ profil }: { profil: Profil }) {
         <input
           name="skola"
           defaultValue={profil.skola ?? ''}
-          className="rounded-md border px-3 py-2 text-base"
+          className="rounded-lg border border-gray-300 px-3 py-2 text-base shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
         />
       </label>
 
@@ -36,7 +36,7 @@ export function ProfilForm({ profil }: { profil: Profil }) {
           rows={4}
           defaultValue={profil.opis ?? ''}
           placeholder="Kako ucis, kada si dostupan, sta trazis od partnera za ucenje..."
-          className="rounded-md border px-3 py-2 text-base"
+          className="rounded-lg border border-gray-300 px-3 py-2 text-base shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
         />
       </label>
 
@@ -45,7 +45,7 @@ export function ProfilForm({ profil }: { profil: Profil }) {
 
       <button
         disabled={pending}
-        className="self-start rounded-md bg-black px-4 py-2 text-white disabled:opacity-50"
+        className="self-start rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {pending ? 'Cuvanje...' : 'Sacuvaj'}
       </button>

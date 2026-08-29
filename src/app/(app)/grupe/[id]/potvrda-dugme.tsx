@@ -27,8 +27,8 @@ export function PotvrdaDugme({
       <button
         type="button"
         onClick={() => setPotvrda(true)}
-        className={`shrink-0 rounded-md border px-3 py-1.5 text-sm ${
-          opasno ? 'border-red-300 text-red-700' : ''
+        className={`shrink-0 rounded-lg border bg-white px-3 py-1.5 text-sm font-medium shadow-sm transition-colors ${
+          opasno ? 'border-red-300 text-red-700 hover:bg-red-50' : 'border-gray-300 text-gray-700 hover:bg-gray-50'
         }`}
       >
         {dugme}
@@ -39,7 +39,7 @@ export function PotvrdaDugme({
   return (
     <form
       action={action}
-      className="flex flex-col items-end gap-2 rounded-md border border-red-200 bg-red-50 p-3"
+      className="flex flex-col items-end gap-2 rounded-xl border border-red-200 bg-red-50 p-3"
     >
       {children}
       <p className="text-right text-sm text-red-800">{poruka}</p>
@@ -47,13 +47,13 @@ export function PotvrdaDugme({
         <button
           type="button"
           onClick={() => setPotvrda(false)}
-          className="rounded-md border px-3 py-1.5 text-sm"
+          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
         >
           Otkazi
         </button>
         <SubmitDugme
           ucitavanjeTekst="Slanje..."
-          className="rounded-md bg-red-600 px-3 py-1.5 text-sm text-white disabled:opacity-50"
+          className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {potvrdaLabela}
         </SubmitDugme>

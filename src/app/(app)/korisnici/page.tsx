@@ -85,11 +85,11 @@ export default async function KorisniciPage({
   return (
     <main className="mx-auto max-w-3xl space-y-6 p-6">
       <header>
-        <h1 className="text-2xl font-semibold">Pretraga korisnika</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Pretraga korisnika</h1>
         <p className="text-sm text-gray-600">Pronadji ljude po imenu, predmetu i nivou znanja.</p>
       </header>
 
-      <form method="get" className="flex flex-wrap items-end gap-3 rounded-md border p-4">
+      <form method="get" className="flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <div className="flex flex-col gap-1">
           <label htmlFor="q" className="text-xs text-gray-600">
             Ime
@@ -100,7 +100,7 @@ export default async function KorisniciPage({
             name="q"
             defaultValue={sp.q ?? ''}
             placeholder="Pretrazi po imenu"
-            className="rounded-md border px-2 py-1.5 text-sm"
+            className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
           />
         </div>
 
@@ -112,7 +112,7 @@ export default async function KorisniciPage({
             id="predmet"
             name="predmet"
             defaultValue={sp.predmet ?? ''}
-            className="rounded-md border px-2 py-1.5 text-sm"
+            className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
           >
             <option value="">Svi predmeti</option>
             {(sviPredmeti ?? []).map((p) => (
@@ -131,7 +131,7 @@ export default async function KorisniciPage({
             id="nivo"
             name="nivo"
             defaultValue={sp.nivo ?? ''}
-            className="rounded-md border px-2 py-1.5 text-sm"
+            className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
           >
             <option value="">Svi nivoi</option>
             {NIVOI.map((n) => (
@@ -144,7 +144,7 @@ export default async function KorisniciPage({
 
         <SubmitDugme
           ucitavanjeTekst="Pretraga..."
-          className="rounded-md bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50"
+          className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Pretrazi
         </SubmitDugme>
@@ -156,13 +156,13 @@ export default async function KorisniciPage({
             <Link
               key={f.label}
               href={f.href}
-              className="flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-xs hover:bg-gray-200"
+              className="flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-1 text-xs text-indigo-700 transition-colors hover:bg-indigo-100"
             >
               {f.label}
               <span aria-hidden>&times;</span>
             </Link>
           ))}
-          <Link href="/korisnici" className="text-xs text-gray-500 underline">
+          <Link href="/korisnici" className="text-xs font-medium text-gray-500 hover:text-gray-700 hover:underline">
             Ocisti sve
           </Link>
         </div>
@@ -178,9 +178,9 @@ export default async function KorisniciPage({
           <PraznoStanje naslov="Trenutno nema drugih korisnika za prikaz." />
         )
       ) : (
-        <ul className="divide-y rounded-md border">
+        <ul className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-sm">
           {rezultati.map((k) => (
-            <li key={k.id} className="flex items-center justify-between gap-4 p-3">
+            <li key={k.id} className="flex items-center justify-between gap-4 p-3 transition-colors hover:bg-gray-50">
               <Link href={`/profil/${k.id}`} className="flex min-w-0 items-center gap-3">
                 <Avatar url={k.avatar_url} ime={k.ime} />
                 <div className="min-w-0">
@@ -191,7 +191,7 @@ export default async function KorisniciPage({
                   {k.skola && <p className="text-xs text-gray-500">{k.skola}</p>}
                 </div>
               </Link>
-              <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-xs">
+              <span className="shrink-0 rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700">
                 {k.zajednicki} zajednickih
               </span>
             </li>

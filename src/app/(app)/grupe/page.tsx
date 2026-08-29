@@ -103,7 +103,7 @@ export default async function GrupePage({
     <main className="mx-auto max-w-3xl space-y-6 p-6">
       <header className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold">Grupe za ucenje</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Grupe za ucenje</h1>
           <p className="text-sm text-gray-600">
             Vidis sve grupe. Privatnoj se pridruzujes uz odobrenje vlasnika.
           </p>
@@ -111,7 +111,7 @@ export default async function GrupePage({
       </header>
 
       {sp.obrisana === '1' && (
-        <p className="rounded-md bg-green-50 px-3 py-2 text-sm text-green-800">
+        <p className="rounded-lg border border-green-100 bg-green-50 px-3 py-2 text-sm text-green-800">
           Grupa je uspesno obrisana.
         </p>
       )}
@@ -120,7 +120,7 @@ export default async function GrupePage({
 
       <NovaGrupa predmeti={predmeti ?? []} />
 
-      <form method="get" className="flex flex-wrap items-end gap-3 rounded-md border p-4">
+      <form method="get" className="flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <div className="flex flex-col gap-1">
           <label htmlFor="q" className="text-xs text-gray-600">
             Naziv
@@ -131,7 +131,7 @@ export default async function GrupePage({
             name="q"
             defaultValue={sp.q ?? ''}
             placeholder="Pretrazi po nazivu"
-            className="rounded-md border px-2 py-1.5 text-sm"
+            className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
           />
         </div>
 
@@ -143,7 +143,7 @@ export default async function GrupePage({
             id="predmet"
             name="predmet"
             defaultValue={sp.predmet ?? ''}
-            className="rounded-md border px-2 py-1.5 text-sm"
+            className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
           >
             <option value="">Svi predmeti</option>
             {(predmeti ?? []).map((p) => (
@@ -155,18 +155,18 @@ export default async function GrupePage({
         </div>
 
         <label className="flex items-center gap-1.5 pb-1.5 text-sm">
-          <input type="checkbox" name="moji" value="1" defaultChecked={samoMoji} />
+          <input type="checkbox" name="moji" value="1" defaultChecked={samoMoji} className="accent-indigo-600" />
           Samo moji predmeti
         </label>
 
         <label className="flex items-center gap-1.5 pb-1.5 text-sm">
-          <input type="checkbox" name="slobodne" value="1" defaultChecked={samoSlobodne} />
+          <input type="checkbox" name="slobodne" value="1" defaultChecked={samoSlobodne} className="accent-indigo-600" />
           Samo slobodne (nepopunjene)
         </label>
 
         <SubmitDugme
           ucitavanjeTekst="Pretraga..."
-          className="rounded-md bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50"
+          className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Pretrazi
         </SubmitDugme>
@@ -178,13 +178,13 @@ export default async function GrupePage({
             <Link
               key={f.label}
               href={f.href}
-              className="flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-xs hover:bg-gray-200"
+              className="flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-1 text-xs text-indigo-700 transition-colors hover:bg-indigo-100"
             >
               {f.label}
               <span aria-hidden>&times;</span>
             </Link>
           ))}
-          <Link href="/grupe" className="text-xs text-gray-500 underline">
+          <Link href="/grupe" className="text-xs font-medium text-gray-500 hover:text-gray-700 hover:underline">
             Ocisti sve
           </Link>
         </div>
@@ -200,7 +200,7 @@ export default async function GrupePage({
           <PraznoStanje naslov="Jos nema grupa. Napravi prvu grupu za ucenje pomocu dugmeta iznad." />
         )
       ) : (
-        <ul className="divide-y rounded-md border">
+        <ul className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-sm">
           {grupe.map((g) => {
             const clan = mojeGrupe.has(g.id)
             const zahtevPoslat = mojiZahtevi.has(g.id)
@@ -210,8 +210,8 @@ export default async function GrupePage({
             return (
               <li
                 key={g.id}
-                className={`flex items-start justify-between gap-4 p-3 ${
-                  istaknuta ? 'bg-amber-50' : ''
+                className={`flex items-start justify-between gap-4 p-3 transition-colors hover:bg-gray-50 ${
+                  istaknuta ? 'bg-amber-50 hover:bg-amber-50' : ''
                 }`}
               >
                 <div className="min-w-0 break-words">
@@ -233,7 +233,7 @@ export default async function GrupePage({
                 </div>
 
                 {clan ? (
-                  <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-xs">clan</span>
+                  <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600">clan</span>
                 ) : zahtevPoslat ? (
                   <span className="shrink-0 text-xs text-gray-500">zahtev poslat</span>
                 ) : !g.is_public ? (

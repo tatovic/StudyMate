@@ -26,7 +26,7 @@ export function Avatar({
         src={url}
         alt={ime}
         style={stil}
-        className={`shrink-0 rounded-full object-cover ${className}`}
+        className={`shrink-0 rounded-full object-cover ring-1 ring-black/5 ${className}`}
       />
     )
   }
@@ -34,7 +34,7 @@ export function Avatar({
   return (
     <div
       style={stil}
-      className={`flex shrink-0 items-center justify-center rounded-full bg-gray-200 text-sm font-medium text-gray-600 ${className}`}
+      className={`flex shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-medium text-indigo-700 ${className}`}
     >
       {inicijali(ime)}
     </div>

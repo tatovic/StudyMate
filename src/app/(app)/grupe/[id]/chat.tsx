@@ -198,7 +198,7 @@ export function Chat({
 
   return (
     <div className="flex flex-col gap-3">
-      <div ref={kontejner} className="h-80 space-y-2 overflow-y-auto rounded-md border p-3">
+      <div ref={kontejner} className="h-80 space-y-2 overflow-y-auto rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
         {!poruke.length && (
           <p className="text-sm text-gray-500">Jos nema poruka. Zapocni razgovor.</p>
         )}
@@ -231,7 +231,7 @@ export function Chat({
               <div className={`${svoja ? 'text-right' : ''} ${noviAutor ? 'mt-3' : 'mt-0.5'}`}>
                 <div
                   className={`inline-block max-w-[80%] rounded-lg px-3 py-2 text-sm ${
-                    svoja ? 'bg-black text-white' : 'bg-gray-100'
+                    svoja ? 'bg-indigo-600 text-white' : 'bg-gray-100'
                   }`}
                 >
                   {noviAutor && !svoja && (
@@ -288,11 +288,11 @@ export function Chat({
           onChange={(e) => setTekst(e.target.value)}
           maxLength={2000}
           placeholder="Napisi poruku..."
-          className="flex-1 rounded-md border px-3 py-2"
+          className="flex-1 rounded-lg border border-gray-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
         />
         <button
           disabled={salje || !tekst.trim()}
-          className="rounded-md bg-black px-4 py-2 text-sm text-white disabled:opacity-50"
+          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Posalji
         </button>

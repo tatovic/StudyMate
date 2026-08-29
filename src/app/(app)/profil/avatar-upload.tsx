@@ -21,7 +21,7 @@ export function AvatarUpload({
     <form ref={formRef} action={formAction} className="flex items-center gap-4">
       <Avatar url={prikazanaSlika} ime={ime} size={72} />
       <div className="flex flex-col gap-1">
-        <label className="w-fit cursor-pointer rounded-md border px-3 py-1.5 text-sm">
+        <label className="w-fit cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
           {pending ? 'Otpremanje...' : 'Promeni sliku'}
           <input
             type="file"

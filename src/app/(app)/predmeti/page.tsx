@@ -35,7 +35,7 @@ export default async function PredmetiPage({
   return (
     <main className="mx-auto max-w-3xl space-y-8 p-6">
       <header>
-        <h1 className="text-2xl font-semibold">Moji predmeti</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Moji predmeti</h1>
         <p className="text-sm text-gray-600">
           Izabrano: {mojiIds.size}. Na osnovu ovoga ti predlazemo korisnike i grupe.
         </p>
@@ -52,11 +52,11 @@ export default async function PredmetiPage({
           <h2 className="text-sm font-medium uppercase tracking-wide text-gray-500">
             {kategorija}
           </h2>
-          <ul className="divide-y rounded-md border">
+          <ul className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white shadow-sm">
             {predmeti!.map((p) => {
               const izabran = mojiIds.has(p.id)
               return (
-                <li key={p.id} className="flex flex-wrap items-center justify-between gap-4 p-3">
+                <li key={p.id} className="flex flex-wrap items-center justify-between gap-4 p-3 transition-colors hover:bg-gray-50">
                   <div className="min-w-0 break-words">
                     <p className="font-medium">{p.naziv}</p>
                     {izabran && (
@@ -72,14 +72,14 @@ export default async function PredmetiPage({
                   ) : (
                     <form action={dodajPredmet} className="flex items-center gap-2">
                       <input type="hidden" name="subject_id" value={p.id} />
-                      <select name="nivo" defaultValue="srednji" className="rounded-md border px-2 py-1.5 text-sm">
+                      <select name="nivo" defaultValue="srednji" className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">
                         <option value="pocetnik">pocetnik</option>
                         <option value="srednji">srednji</option>
                         <option value="napredni">napredni</option>
                       </select>
                       <SubmitDugme
                         ucitavanjeTekst="Dodavanje..."
-                        className="rounded-md bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50"
+                        className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Dodaj
                       </SubmitDugme>
