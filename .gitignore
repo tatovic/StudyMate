@@ -46,8 +46,3 @@ supabase/.temp
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# Next.js generise ove fajlove pri pokretanju dev servera
-AGENTS.md
-CLAUDE.md
-.claude/
