@@ -2,7 +2,7 @@
 
 > Ovaj dokument je izvor istine za tehnološke odluke i konvencije.
 > Obavezno pročitati pre rada na bilo kom tiketu.
-> Povezani dokumenti: [prd.md](./prd.md) (šta gradimo), [db.md](./db.md) (baza).
+> Povezani dokumenti: [prd.md](./prd.md) (šta gradimo).
 
 ---
 
@@ -87,9 +87,7 @@ Uvek se poziva sa `await`.
 ```
 studymate/
   prd.md                        Proizvodni zahtevi + lista tiketa
-  db.md                         Šema baze, RLS, funkcije
   tech.md                       Ovaj fajl
-  tickets/                      Opis svakog tiketa sa kriterijumima prihvatanja
   supabase/migrations/          SQL migracije (redosled je bitan)
   src/
     proxy.ts                    Next 16 proxy — sesija + zaštita ruta
@@ -207,7 +205,7 @@ Isto važi za RPC pozive: `supabase.rpc('pronadji_slicne', ...)` vraća tip dire
 ## 5. Bezbednost
 
 1. **`NEXT_PUBLIC_SUPABASE_ANON_KEY` je javan.** Vidljiv je u browseru svakome.
-   Sva bezbednost je u bazi — RLS politikama i GRANTovima. Videti [db.md](./db.md).
+   Sva bezbednost je u bazi — RLS politikama i GRANTovima.
 2. **Nikad ne koristi `service_role` ključ u ovoj aplikaciji.** On zaobilazi RLS.
    Ako zatreba, ide isključivo u serverski kod i nikad u promenljivu sa `NEXT_PUBLIC_` prefiksom.
 3. **Ne veruj `user_id` iz forme.** Uvek ga uzmi iz `getUser()` na serveru.
@@ -241,7 +239,7 @@ Tiket nije završen dok sve ovo ne prolazi:
 - [ ] `npm test` — prolazi (jedinični testovi + testovi pravila pristupa)
 - [ ] Ako je tiket dirao glavni tok (prijava, predmeti, grupe, chat): `npm run test:e2e` prolazi
 - [ ] Funkcionalnost ručno proverena u `npm run dev`
-- [ ] Ako je dirana baza: nova migracija u `supabase/migrations/` i ažuriran `db.md`
+- [ ] Ako je dirana baza: nova migracija u `supabase/migrations/`
 - [ ] Ako je dirana logika validacije ili rangiranja: dodati/ažurirati testovi u `tests/unit/`
 - [ ] Kvačica u `prd.md` uz odgovarajući tiket
 - [ ] Commit sa jasnom porukom na srpskom
@@ -250,8 +248,7 @@ Tiket nije završen dok sve ovo ne prolazi:
 
 ## 8. Testiranje
 
-Tri nivoa, svaki u svom direktorijumu i sa svojom svrhom (vidi
-[01.5-osnovni-testovi.md](./tickets/01.5-osnovni-testovi.md)):
+Tri nivoa, svaki u svom direktorijumu i sa svojom svrhom:
 
 | Nivo | Direktorijum | Alat | Pokreće se sa |
 |---|---|---|---|
@@ -290,7 +287,7 @@ povlači i profil, predmete, grupe, članstva i poruke tog korisnika — nema ru
 tabela, testovi ne ostavljaju smeće.
 
 **Preduslov:** *Confirm email* mora biti isključen u tom Supabase projektu (isto
-podešavanje koje `db.md` već traži za razvoj) — inače `signUp` ne vraća odmah aktivnu
+podešavanje koje je već potrebno za razvoj) — inače `signUp` ne vraća odmah aktivnu
 sesiju i test korisnik ne može ništa da uradi.
 
 ### 8.3 End-to-end test
@@ -322,4 +319,4 @@ npx playwright install chromium
 | `params.id` je `undefined` | Next 16 — `params` je Promise | `const { id } = await params` |
 | Realtime `postgres_changes` javlja `"invalid column for filter <kolona>"` | Kolona iz `filter:` nema **samostalan** indeks (biti deo složenog indeksa, npr. `(group_id, created_at)`, ne računa se) | Ili dodati samostalan indeks na tu kolonu, ili (kao u `chat.tsx`) izbaciti `filter` i filtrirati u callback-u — RLS već ograničava koje redove korisnik prima |
 | Realtime DELETE/UPDATE događaj ne stiže nikome | `old` deo payload-a nosi samo kolone `REPLICA IDENTITY` (podrazumevano samo primarni ključ), pa Realtime ne može da izračuna RLS politiku koja zavisi od drugih kolona (npr. `group_id`) i tiho ne isporučuje događaj | `alter table ... replica identity full;` (vidi `012_realtime_brisanje_poruka.sql`) |
-| Otpremanje u Storage pada sa `new row violates row-level security policy` (HTTP 400, `statusCode: '403'`) iako je korisnik prijavljen i politika izgleda tačno | **`auth.uid()` vraća `NULL` unutar Storage zahteva** — Storage servis ne prosleđuje `request.jwt.claims` u SQL kontekst (za razliku od PostgREST-a, gde isti token radi normalno) | U politikama nad `storage.objects` koristiti `owner_id` umesto `auth.uid()`, npr. `(storage.foldername(name))[1] = owner_id::text` (vidi `014_avatars_owner.sql` i `db.md` sekciju 8) |
+| Otpremanje u Storage pada sa `new row violates row-level security policy` (HTTP 400, `statusCode: '403'`) iako je korisnik prijavljen i politika izgleda tačno | **`auth.uid()` vraća `NULL` unutar Storage zahteva** — Storage servis ne prosleđuje `request.jwt.claims` u SQL kontekst (za razliku od PostgREST-a, gde isti token radi normalno) | U politikama nad `storage.objects` koristiti `owner_id` umesto `auth.uid()`, npr. `(storage.foldername(name))[1] = owner_id::text` (vidi `014_avatars_owner.sql`) |

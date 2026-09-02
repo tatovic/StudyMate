@@ -12,12 +12,10 @@ Supabase (Postgres + Auth + Realtime)
 
 | Fajl | Sadržaj |
 |---|---|
-| [prd.md](./prd.md) | Šta gradimo: zahtevi, rečnik pojmova, **lista tiketa sa napretkom** |
-| [db.md](./db.md) | Model podataka: tabele, RLS politike, GRANT-ovi, RPC funkcije |
+| [prd.md](./prd.md) | Šta gradimo: zahtevi, rečnik pojmova, **napredak po sekcijama** |
 | [tech.md](./tech.md) | Tehnološke odluke, konvencije koda, Next.js 16 specifičnosti |
-| [tickets/](./tickets/) | Po jedan fajl za svaki tiket, hronološkim redom |
 
-> Redosled čitanja pre rada na kodu: `prd.md` → `tech.md` → `db.md`.
+> Redosled čitanja pre rada na kodu: `prd.md` → `tech.md`.
 > Zatim se uzima prvi neštikliran tiket iz sekcije 8 u `prd.md`.
 
 ---
@@ -30,7 +28,7 @@ Supabase (Postgres + Auth + Realtime)
 2. U **SQL Editor** pokrenite redom fajlove iz `supabase/migrations/`:
    `001_schema.sql` → `002_rls.sql` → `003_matching.sql` → `004_seed.sql` → `005_grants.sql`
 3. U **Authentication → Sign In / Providers → Email** isključite *Confirm email*
-   (samo za razvoj; u produkciji ostaje uključeno — vidi tiket 11)
+   (samo za razvoj; u produkciji ostaje uključeno)
 
 ### 2. Promenljive okruženja
 
@@ -72,12 +70,12 @@ Aplikacija radi na `http://localhost:3000`.
 
 ## Deploy na Vercel
 
-**Javni URL:** _(popuniti posle prvog deploya — vidi tiket 11)_
+**Javni URL:** _(popuniti posle prvog deploya)_
 
 1. Na [vercel.com](https://vercel.com) → **Add New → Project** → poveži GitHub repo
    `tatovic/StudyMate`. Root Directory ostaje `.` (Next.js se detektuje automatski).
 2. U **Settings → Environment Variables** dodaj iste promenljive kao u `.env.local`
-   (vrednosti iz istog Supabase projekta koji se koristi za razvoj — vidi `db.md`, 6.1):
+   (vrednosti iz istog Supabase projekta koji se koristi za razvoj):
    ```
    NEXT_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co
    NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon ili publishable ključ>
@@ -86,7 +84,7 @@ Aplikacija radi na `http://localhost:3000`.
    lokalno, aplikacija ga nikad ne učitava u runtime-u (vidi `tech.md`, sekcija 5).
 3. Deploy. Vercel dodeljuje URL oblika `https://<projekat>.vercel.app` — upiši ga
    iznad i u `Site URL` iz koraka 4.
-4. U Supabase Dashboardu podesi produkcijske vrednosti iz `db.md`, sekcija 6.1:
+4. U Supabase Dashboardu podesi produkcijske vrednosti:
    **Authentication → URL Configuration** — `Site URL` na Vercel URL, i dodaj ga u
    `Redirect URLs` kao `https://<projekat>.vercel.app/**` (bez brisanja
    `http://localhost:3000/**`).

@@ -72,7 +72,7 @@ export default async function GrupaPage({
 
   // Zahtevi na cekanju - vidljivi samo vlasniku (RLS: je_clan(group_id) je tacno
   // za vlasnika jer je i sam aktivan clan, pa moze da procita sve redove grupe,
-  // ukljucujuci tudje zahteve na cekanju - vidi db.md, sekcija 4.3).
+  // ukljucujuci tudje zahteve na cekanju).
   const { data: zahtevi } = jeVlasnik
     ? await supabase
         .from('group_members')

@@ -4,7 +4,7 @@ import { nadjiKorisnikaPoImenu, obrisiTestKorisnika } from '../helpers/admin'
 // Jedan prolaz kroz glavni tok u pravom browseru: registracija -> izbor predmeta ->
 // kreiranje grupe -> slanje poruke -> odjava. Zahteva pokrenut dev server (Playwright
 // ga sam pokrece, vidi playwright.config.ts) i "Confirm email" iskljucen u test
-// Supabase projektu (db.md, sekcija 6) - inace se registracija ne uloguje odmah.
+// Supabase projektu - inace se registracija ne uloguje odmah.
 
 test('registracija, izbor predmeta, kreiranje grupe, poruka, odjava', async ({ page }) => {
   const oznaka = `${Date.now()}-${Math.floor(Math.random() * 1e6)}`

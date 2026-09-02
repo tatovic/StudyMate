@@ -13,7 +13,7 @@ export type TestKorisnik = {
 }
 
 // Registruje pravog korisnika preko anon kljuca (isto sto radi i register forma).
-// Zahteva da "Confirm email" bude iskljucen u test Supabase projektu (vidi db.md 6),
+// Zahteva da "Confirm email" bude iskljucen u test Supabase projektu,
 // inace signUp ne vraca odmah aktivnu sesiju.
 export async function registrujTestKorisnika(oznaka: string): Promise<TestKorisnik> {
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -32,7 +32,7 @@ export async function registrujTestKorisnika(oznaka: string): Promise<TestKorisn
   if (error || !data.user || !data.session) {
     throw new Error(
       `Registracija test korisnika nije uspela: ${error?.message ?? 'nema sesije posle signUp-a'}. ` +
-        'Proveri da li je "Confirm email" iskljucen u test Supabase projektu (db.md, sekcija 6).'
+        'Proveri da li je "Confirm email" iskljucen u test Supabase projektu.'
     )
   }
 

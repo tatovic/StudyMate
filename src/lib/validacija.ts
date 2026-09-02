@@ -1,5 +1,5 @@
 // Cista validaciona logika bez baze i bez mreze - testira se u tests/unit/validacija.test.ts.
-// Pravila ovde prate ogranicenja koja vec postoje u bazi (vidi db.md), samo ih prijavljuju
+// Pravila ovde prate ogranicenja koja vec postoje u bazi, samo ih prijavljuju
 // korisniku ranije i razumljivijom porukom nego sirova Postgres greska.
 
 export function validirajNazivGrupe(naziv: string): string | null {

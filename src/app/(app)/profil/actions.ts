@@ -38,7 +38,7 @@ export async function sacuvajProfil(_prev: unknown, formData: FormData) {
 // Putanja se gradi iz getUser(), nikad iz ulaza, pa korisnik moze postaviti
 // sliku iskljucivo na sopstveni profil. RLS je druga linija odbrane, ali
 // paznja: politike nad storage.objects se NE oslanjaju na auth.uid(), jer
-// on unutar Storage zahteva vraca NULL (vidi db.md, sekcija 8). Vlasnistvo
+// on unutar Storage zahteva vraca NULL. Vlasnistvo
 // se proverava preko owner_id kolone koju popunjava sam Storage servis.
 export async function sacuvajAvatar(
   _prev: unknown,

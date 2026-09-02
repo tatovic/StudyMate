@@ -7,7 +7,7 @@ import { registrujTestKorisnika, type TestKorisnik } from '../helpers/nalog'
 // Ovi testovi rade nad pravom Supabase bazom iz .env.local i proveravaju da RLS
 // politike iz 002_rls.sql stvarno rade, ne samo da postoje. Svaki test pravi
 // sopstvene test korisnike; ciscenje ide preko obrisiTestKorisnika, koje se oslanja
-// na "on delete cascade" da pokupi sve sto su ti korisnici napravili (vidi db.md).
+// na "on delete cascade" da pokupi sve sto su ti korisnici napravili.
 
 describe('Pravila pristupa (RLS)', () => {
   let vlasnik: TestKorisnik

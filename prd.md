@@ -1,10 +1,10 @@
 # prd.md — StudyMate
 
 > Izvor istine za **šta** gradimo i **dokle smo stigli**.
-> Tehničke odluke su u [tech.md](./tech.md), model podataka u [db.md](./db.md).
+> Tehničke odluke su u [tech.md](./tech.md).
 >
-> **Po završetku tiketa obavezno štiklirati kvačicu u sekciji 8 ovog fajla**
-> i u odgovarajućem fajlu u `tickets/`. To je jedini pouzdan zapis napretka.
+> **Po završetku tiketa obavezno štiklirati kvačicu u sekciji 8 ovog fajla.**
+> To je jedini pouzdan zapis napretka.
 
 ---
 
@@ -156,23 +156,21 @@ mora u `security definer` funkciju koja vraća samo broj, bez identiteta članov
 ## 8. Tiketi
 
 Tiketi su hronološki — svaki je blokiran prethodnim, radi se odozgo nadole.
-Puni opis i kriterijumi prihvatanja su u `tickets/`.
 
-**Kada završiš tiket:** štikliraj kvačicu ovde **i** promeni `**Status:**` u
-odgovarajućem fajlu iz `tickets/` u `zavrseno`.
+**Kada završiš tiket:** štikliraj kvačicu ovde.
 
-- [x] **01** — [Popraviti pristup podacima i potvrditi katalog predmeta](./tickets/01-pristup-podacima-i-katalog.md)
-- [x] **01.5** — [Osnovni testovi](./tickets/01.5-osnovni-testovi.md)
-- [x] **02** — [Generisani tipovi baze umesto ručnih override-a](./tickets/02-generisani-tipovi-baze.md)
-- [x] **03** — [Slika profila: upload, prikaz i zamena](./tickets/03-slika-profila.md)
-- [x] **04** — [Javni profil drugog korisnika](./tickets/04-javni-profil-korisnika.md)
-- [ ] **05** — [Pretraga i filtriranje korisnika](./tickets/05-pretraga-korisnika.md)
-- [ ] **06** — [Pretraga i filtriranje grupa](./tickets/06-pretraga-grupa.md)
-- [x] **07** — [Upravljanje grupom za vlasnika](./tickets/07-upravljanje-grupom.md)
-- [ ] **08** — [Privatne grupe sa odobravanjem članstva](./tickets/08-privatne-grupe.md)
-- [x] **09** — [Dorada chata: vreme, brisanje, starije poruke](./tickets/09-dorada-chata.md)
-- [x] **10** — [Prazna stanja, učitavanje i obrada grešaka](./tickets/10-prazna-stanja-i-greske.md)
-- [ ] **11** — [Deploy na Vercel i produkcijska autentifikacija](./tickets/11-deploy-i-produkcija.md)
+- [x] **01** — Popraviti pristup podacima i potvrditi katalog predmeta
+- [x] **01.5** — Osnovni testovi
+- [x] **02** — Generisani tipovi baze umesto ručnih override-a
+- [x] **03** — Slika profila: upload, prikaz i zamena
+- [x] **04** — Javni profil drugog korisnika
+- [ ] **05** — Pretraga i filtriranje korisnika
+- [ ] **06** — Pretraga i filtriranje grupa
+- [x] **07** — Upravljanje grupom za vlasnika
+- [ ] **08** — Privatne grupe sa odobravanjem članstva
+- [x] **09** — Dorada chata: vreme, brisanje, starije poruke
+- [x] **10** — Prazna stanja, učitavanje i obrada grešaka
+- [ ] **11** — Deploy na Vercel i produkcijska autentifikacija
 
 ### Pokrivenost zahteva
 
@@ -197,11 +195,8 @@ odgovarajućem fajlu iz `tickets/` u `zavrseno`.
 
 1. Pročitati [tech.md](./tech.md) pre pisanja koda. Next.js 16 se razlikuje od ranijih
    verzija — `proxy.ts` umesto `middleware.ts`, asinhroni `params` i `cookies()`.
-2. Pročitati [db.md](./db.md) pre dodirivanja baze. Svaka nova tabela ili kolona traži
-   i RLS politiku i GRANT.
-3. Raditi **jedan tiket odjednom**, redom. Ne počinjati tiket čiji blokeri nisu završeni.
-4. Ne menjati postojeće migracije — dodati novu sa sledećim brojem.
-5. Poštovati rečnik iz sekcije 3. Ne uvoditi nove nazive za postojeće koncepte.
-6. Pre commita: `npx tsc --noEmit`, `npm run lint`, `npm run build`.
-7. Po završetku: štiklirati tiket ovde, ažurirati `tickets/NN-*.md`, i ako je dirana
-   baza — ažurirati `db.md`.
+2. Raditi **jedan tiket odjednom**, redom. Ne počinjati tiket čiji blokeri nisu završeni.
+3. Ne menjati postojeće migracije — dodati novu sa sledećim brojem.
+4. Poštovati rečnik iz sekcije 3. Ne uvoditi nove nazive za postojeće koncepte.
+5. Pre commita: `npx tsc --noEmit`, `npm run lint`, `npm run build`.
+6. Po završetku: štiklirati tiket ovde.

@@ -170,7 +170,7 @@ export async function ukloniClana(formData: FormData) {
   const groupId = Number(formData.get('group_id'))
   const clanId = String(formData.get('user_id'))
 
-  // Vlasnik ne moze ukloniti sebe - vidi napomenu u db.md, sekcija 4.3.
+  // Vlasnik ne moze ukloniti sebe.
   if (clanId === user.id) return
 
   const { error } = await supabase
